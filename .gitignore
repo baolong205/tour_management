@@ -4,3 +4,7 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Tệp người dùng tải lên (do UploadModule ghi ra) – không commit vào repo.
+backend/uploads/
+*.tsbuildinfo

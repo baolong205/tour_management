@@ -1,0 +1,46 @@
+{
+  /*
+   * `emitDecoratorMetadata` PHẢI bật true.
+   *
+   * NestJS inject phụ thuộc qua constructor mà không cần @Inject() ở phần lớn
+   * trường hợp (ví dụ AppController nhận AppService). Cơ chế đó dựa hoàn toàn
+   * vào metadata `design:paramtypes` do TypeScript sinh ra khi
+   * emitDecoratorMetadata = true. Tắt nó đi thì tham số constructor trở thành
+   * `undefined` lúc runtime (lỗi "Cannot read properties of undefined").
+   *
+   * Đổi lại, bật metadata gây ra vấn đề TDZ với entity có quan hệ vòng lặp:
+   * decorator sinh `__metadata('design:type', Tour)` nên đọc binding ESM ngay
+   * lúc nạp module; với import vòng lặp binding còn trong TDZ ⇒
+   * "ReferenceError: Cannot access 'Tour' before initialization".
+   *
+   * Cách xử lý (đã áp dụng cho mọi entity): thuộc tính quan hệ khai báo bằng
+   * `Relation<T>` (alias chỉ tồn tại ở mức kiểu, design:type phát ra là Object)
+   * và import entity đối diện bằng `import type` (bị xoá khi biên dịch, không
+   * tạo vòng lặp runtime). Decorator vẫn dùng callback `() => Tour` nên TypeORM
+   * vẫn biết đúng entity đích.
+   */
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "types": [
+      "vitest/globals",
+      "node"
+    ]
+  }
+}
