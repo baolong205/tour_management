@@ -26,6 +26,16 @@ Nếu backend dùng cổng khác, sửa `API_PROXY_TARGET` trong `.env` rồi kh
 
 ## Kiểm tra
 
+## Hiệu ứng giao diện
+
+- Hiệu ứng vào trang, tiêu đề banner xuất hiện lần lượt, ảnh banner phóng nhẹ một lần.
+- Các thẻ tour và khối nội dung xuất hiện khi vào vùng nhìn; hỗ trợ cả dữ liệu API tải bất đồng bộ.
+- Hover/nhấn cho nút, ảnh, danh mục; hiệu ứng mở menu và hộp thoại.
+- Không thêm thư viện. CSS nằm ở `D:\nam4\project\tour_management\frontend\src\animations.css`; bộ quan sát nằm ở `D:\nam4\project\tour_management\frontend\src\motion.js`.
+- Tôn trọng `prefers-reduced-motion`, kể cả khi thay đổi lúc trang đang mở. Khi không có observer, nội dung vẫn hiển thị bình thường. Không remount trang khi chỉ thay đổi query bộ lọc.
+
+### Lệnh kiểm tra
+
 ```powershell
 npm test
 npm run build

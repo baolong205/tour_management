@@ -1,0 +1,43 @@
+/* Motion is opt-in. No observer = no hidden content; reduced motion = static UI. */
+@media (prefers-reduced-motion: no-preference) {
+  .route-view { animation: page-arrive 300ms ease-out; }
+  .motion-enter { animation: reveal-arrive 580ms cubic-bezier(.2,.7,.25,1) var(--reveal-delay, 0ms) backwards; }
+  .hero-content > * { animation: hero-arrive 650ms cubic-bezier(.2,.7,.25,1) backwards; }
+  .hero-content > :nth-child(2) { animation-delay: 80ms; }
+  .hero-content > :nth-child(3) { animation-delay: 160ms; }
+  .hero-content > :nth-child(4) { animation-delay: 240ms; }
+  .hero-content > :nth-child(5) { animation-delay: 300ms; }
+  .hero-landscape { animation: landscape-settle 4500ms ease-out both; }
+  .search-panel { animation: hero-arrive 650ms 200ms ease-out backwards; }
+  .modal-backdrop { animation: overlay-arrive 180ms ease-out; }
+  .modal { animation: dialog-arrive 240ms cubic-bezier(.2,.7,.25,1); }
+  .notice { animation: hero-arrive 220ms ease-out; }
+  .nav-links.open { animation: menu-arrive 200ms ease-out; }
+  .btn { transition: transform 180ms ease, box-shadow 200ms ease, background 200ms ease, color 200ms ease; }
+  .btn:active:not(:disabled) { transform: scale(.97); }
+  .btn svg, .card-link svg, .link-arrow svg, .footer-cta svg { transition: transform 220ms ease; }
+  .btn:hover:not(:disabled) svg, .link-arrow:hover svg, .footer-cta:hover svg { transform: translateX(4px); }
+  .chip, .benefit-icon, .card-link, .image-arrow { transition: transform 240ms ease, background 200ms ease, box-shadow 240ms ease; }
+  .tour-card { transition: transform 240ms ease, box-shadow 240ms ease; }
+  .tour-image img { transition: transform 650ms cubic-bezier(.2,.7,.25,1); }
+  .nav-links .active::after { animation: underline-arrive 220ms ease-out; }
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .chip:hover { transform: translateY(-3px); box-shadow: 0 5px 14px #123e3810; }
+    .benefit:hover .benefit-icon { transform: translateY(-5px) rotate(-4deg); box-shadow: 0 8px 22px #087f7514; }
+    .tour-card:hover .image-arrow { transform: rotate(-30deg); background: #fff; }
+    .card-link:hover svg { transform: translateX(3px); }
+    .tour-card:focus-within { transform: translateY(-4px); box-shadow: 0 10px 28px #123e3814; }
+  }
+}
+@keyframes page-arrive { from { opacity: .35; } to { opacity: 1; } }
+@keyframes reveal-arrive { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes hero-arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes landscape-settle { from { transform: scale(1.045); } to { transform: scale(1); } }
+@keyframes overlay-arrive { from { background-color: #15362c00; } to { background-color: #15362c85; } }
+@keyframes dialog-arrive { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes menu-arrive { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes underline-arrive { from { opacity: 0; scale: .3 1; } to { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter, .route-view, .hero-content > *, .hero-landscape, .modal, .modal-backdrop { animation: none !important; }
+}

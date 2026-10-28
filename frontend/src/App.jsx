@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import Home from './pages/Home.jsx';
@@ -9,6 +9,7 @@ import Booking from './pages/Booking.jsx';
 import MyBookings from './pages/MyBookings.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import { useAuth } from './context/AuthContext.jsx';
+import { observePageMotion } from './motion.js';
 
 function Protected({ children, permission, next }) {
   const { user, loading, can } = useAuth();
@@ -18,6 +19,8 @@ function Protected({ children, permission, next }) {
   return children;
 }
 export default function App() {
+  const mainRef = useRef(null);
+  useEffect(() => observePageMotion(mainRef.current), []);
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   useEffect(() => { const change = () => { setRoute(window.location.hash.slice(1) || '/'); window.scrollTo(0, 0); }; window.addEventListener('hashchange', change); return () => window.removeEventListener('hashchange', change); }, []);
   const [path, query = ''] = route.split('?');
@@ -31,5 +34,5 @@ export default function App() {
   else if (path === '/bookings') page = <Protected next={route}><MyBookings /></Protected>;
   else if (path === '/admin') page = <Protected next={route} permission="tour:read"><AdminDashboard /></Protected>;
   else page = <div className="state"><h1>Không tìm thấy trang</h1><a className="btn" href="#/">Về trang chủ</a></div>;
-  return <><a className="skip-link" href="#main" onClick={event => { event.preventDefault(); document.getElementById('main')?.focus(); }}>Bỏ qua menu</a><Navbar path={path} /><main id="main" tabIndex={-1}>{page}</main><Footer /></>;
+  return <><a className="skip-link" href="#main" onClick={event => { event.preventDefault(); document.getElementById('main')?.focus(); }}>Bỏ qua menu</a><Navbar path={path} /><main id="main" ref={mainRef} tabIndex={-1}><div className="route-view" key={path}>{page}</div></main><Footer /></>;
 }
