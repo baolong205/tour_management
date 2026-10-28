@@ -1,0 +1,31 @@
+import React, { useState } from 'react';
+import { useApi } from '../hooks.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import { api } from '../services/api.js';
+import { date, money } from '../utils.js';
+import { Icon, State } from '../components/UI.jsx';
+
+export default function Booking({ id, params }) {
+  const { user } = useAuth();
+  const schedules = useApi(`/schedules/tour/${id}`);
+  const schedule = schedules.data?.find(s => s.id === params.get('scheduleId'));
+  const [passengers, setPassengers] = useState([{ fullName: '', dob: '' }]);
+  const [promotionCode, setPromotionCode] = useState('');
+  const [quote, setQuote] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [result, setResult] = useState(null);
+  function changePassenger(index, key, value) { setQuote(null); setPassengers(values => values.map((p, i) => i === index ? { ...p, [key]: value } : p)); }
+  async function submit(event) {
+    event.preventDefault(); if (busy) return; setBusy(true); setError('');
+    const values = Object.fromEntries(new FormData(event.currentTarget));
+    const body = { scheduleId: schedule.id, passengers, ...(promotionCode.trim() ? { promotionCode: promotionCode.trim() } : {}) };
+    try {
+      if (!quote) setQuote(await api('/bookings/quote', { method: 'POST', body }));
+      else { const booking = await api('/bookings', { method: 'POST', body: { ...body, ...values } }); setResult(booking); }
+    } catch (error) { setError(error.message); setQuote(null); } finally { setBusy(false); }
+  }
+  if (result) return <section className="container section"><div className="state success"><Icon name="check" size={48} /><h1>Đã tạo đơn đặt tour!</h1><p>Mã đặt tour: <strong>{result.code}</strong></p><p>Đơn đã được gửi tới hệ thống. Việc tạo đơn chưa đồng nghĩa đã thanh toán hoặc được xác nhận.</p><a className="btn" href="#/bookings">Theo dõi đơn đặt tour <Icon name="arrow" /></a></div></section>;
+  if (!schedule) return <div className="container section"><State loading={schedules.loading} error={schedules.error} empty={!schedules.loading && !schedules.error} /><a href={`#/tours/${id}`} className="btn outline">Quay lại chọn lịch khởi hành</a></div>;
+  return <section className="container section"><div className="breadcrumbs"><a href={`#/tours/${id}`}>Chi tiết tour</a> / Đặt tour</div><span className="eyebrow">CHỈ CÒN MỘT BƯỚC NỮA</span><h1>Chuẩn bị cho chuyến đi của bạn</h1><div className="detail-layout"><form className="booking-form" onSubmit={submit}><section className="panel"><h2>01. Thông tin liên hệ</h2><div className="form-grid"><label>Họ và tên<input name="contactName" defaultValue={user.fullName} required minLength={2} maxLength={150} autoComplete="name" /></label><label>Số điện thoại<input name="contactPhone" required pattern="(0[0-9]{9}|\+84[0-9]{9})" title="10 số bắt đầu bằng 0 hoặc +84 và 9 số" autoComplete="tel" /></label><label className="span-2">Email<input name="contactEmail" type="email" defaultValue={user.email} required maxLength={191} autoComplete="email" /></label></div></section><section className="panel"><h2>02. Danh sách hành khách</h2><p className="muted">Nhập ngày sinh chính xác. Hệ thống tự tính loại vé và giá theo ngày khởi hành.</p>{passengers.map((passenger, index) => <div className="passenger" key={index}><div className="passenger-heading"><strong>Hành khách {index + 1}</strong>{passengers.length > 1 && <button className="text-button danger" type="button" disabled={busy} onClick={() => { setPassengers(p => p.filter((_, i) => i !== index)); setQuote(null); }}>Xóa</button>}</div><div className="form-grid"><label>Họ tên<input value={passenger.fullName} disabled={busy} onChange={e => changePassenger(index, 'fullName', e.target.value)} minLength={2} maxLength={150} required /></label><label>Ngày sinh<input type="date" value={passenger.dob} disabled={busy} max={new Date().toLocaleDateString('en-CA')} onChange={e => changePassenger(index, 'dob', e.target.value)} required /></label></div></div>)}<button className="btn outline" type="button" disabled={busy || passengers.length >= 30} onClick={() => { setPassengers(p => [...p, { fullName: '', dob: '' }]); setQuote(null); }}>+ Thêm hành khách</button></section><section className="panel"><h2>03. Thông tin bổ sung</h2><label>Mã ưu đãi<input value={promotionCode} disabled={busy} maxLength={40} onChange={e => { setPromotionCode(e.target.value); setQuote(null); }} placeholder="Nhập mã ưu đãi (nếu có)" /></label><label>Ghi chú<textarea name="note" maxLength={1000} rows={3} placeholder="Yêu cầu hoặc thông tin thêm cho chuyến đi" /></label></section>{error && <p className="notice error" role="alert">{error}</p>}<button className="btn full" disabled={busy || (quote && !quote.canBook)}>{busy ? 'Đang xử lý...' : quote ? 'Xác nhận đặt tour' : 'Xem báo giá chính xác'}<Icon name="arrow" /></button></form><aside><div className="booking-panel"><span className="eyebrow">HÀNH TRÌNH ĐÃ CHỌN</span><h2>{schedule.tourName}</h2><p><Icon name="calendar" size={17} /> {date(schedule.startDate)} – {date(schedule.endDate)}</p><p><Icon name="pin" size={17} /> {schedule.meetingPoint || 'Điểm đón đang cập nhật'}</p><div className="price-line"><span>Người lớn</span><strong>{money(schedule.priceAdult)}</strong></div><div className="price-line"><span>Trẻ em</span><strong>{money(schedule.priceChild)}</strong></div><div className="price-line"><span>Em bé</span><strong>{money(schedule.priceInfant)}</strong></div>{quote ? <div aria-live="polite"><h3>Báo giá từ hệ thống</h3>{quote.lines.map(line => <div className="price-line" key={line.type}><span>{{ ADULT: 'Người lớn', CHILD: 'Trẻ em', INFANT: 'Em bé' }[line.type] || line.type} × {line.quantity}</span><strong>{money(line.amount)}</strong></div>)}<div className="price-line"><span>Giảm giá</span><strong>−{money(quote.discount)}</strong></div><div className="price-line total"><span>Tổng cộng</span><strong>{money(quote.total)}</strong></div>{!quote.canBook && <p className="notice error">Không đủ chỗ cho số hành khách đã chọn.</p>}</div> : <p className="booking-note">Điền hành khách rồi bấm “Xem báo giá chính xác”. Giá cuối cùng do backend tính, không ước tính tại trình duyệt.</p>}</div></aside></div></section>;
+}

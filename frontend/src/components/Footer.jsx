@@ -1,0 +1,5 @@
+import React from 'react';
+import { Icon } from './UI.jsx';
+export default function Footer() {
+  return <footer className="footer"><div className="container footer-grid"><div><a className="brand" href="#/">ViVu<span className="footer-dot">.</span></a><p>Mỗi chuyến đi, một câu chuyện.<br />Cùng bạn khám phá những điều tuyệt vời.</p></div><div><h4>Khám phá</h4><a href="#/tours">Tất cả hành trình</a><a href="#/tours?sortBy=avgRating">Tour được yêu thích</a></div><div><h4>Hành trình của bạn</h4><a href="#/bookings">Đơn đặt tour</a><a href="#/login">Tài khoản cá nhân</a></div><div><h4>Sẵn sàng cho chuyến đi mới?</h4><p>Chọn điểm đến. ViVu lo hành trình.</p><a className="footer-cta" href="#/tours">Khám phá ngay <Icon name="arrow" size={18} /></a></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} ViVu Travel. Đi để thấy, đến để yêu.</span><span><a href="/images/credits.html" target="_blank" rel="noopener noreferrer">Nguồn ảnh: Pexels ↗</a></span></div></footer>;
+}

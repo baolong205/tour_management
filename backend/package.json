@@ -19,6 +19,8 @@
     "db:check": "npm run db:build && node dist/scripts/check-db.js",
     "db:sync": "npm run db:build && node dist/scripts/check-db.js --sync",
     "db:seed": "npm run db:build && node dist/scripts/seed.js",
+    "db:seed:tours": "npm run db:build && node dist/scripts/seed-tours.js",
+    "db:seed:images": "npm run db:build && node dist/scripts/seed-tour-images.js",
     "test": "vitest run",
     "test:entities": "vitest run src/database/verify-entities.spec.ts",
     "test:watch": "vitest",

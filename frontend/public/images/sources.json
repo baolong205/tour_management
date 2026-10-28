@@ -1,0 +1,14 @@
+{
+  "provider": "Pexels",
+  "license": "https://www.pexels.com/license/",
+  "downloadedAt": "2026-10-28",
+  "notes": "Destination photographs used as illustrative imagery, not a guarantee of tour accommodation or services. No endorsement is implied. Images resized by Pexels CDN to width 1600. Photographer names not independently verified; original photo pages are linked below.",
+  "photos": [
+    { "code": "DEMO-DNHA", "file": "hoi-an.jpg", "photoId": 4695913, "alt": "Những ngôi nhà ven sông ở Hội An", "source": "https://www.pexels.com/photo/4695913/" },
+    { "code": "DEMO-PQ", "file": "phu-quoc.jpg", "photoId": 4603354, "alt": "Hàng dừa và biển, ảnh minh họa hành trình Phú Quốc", "source": "https://www.pexels.com/photo/4603354/" },
+    { "code": "DEMO-SP", "file": "sa-pa.jpg", "photoId": 36754846, "alt": "Nhà cửa và sườn núi xanh ở Sa Pa", "source": "https://www.pexels.com/photo/36754846/" },
+    { "code": "DEMO-DL", "file": "da-lat.jpg", "photoId": 35731527, "alt": "Hoàng hôn trên đồi, ảnh minh họa hành trình Đà Lạt", "source": "https://www.pexels.com/photo/35731527/" },
+    { "code": "DEMO-HL", "file": "ha-long.jpg", "photoId": 7276642, "alt": "Trải nghiệm chèo kayak giữa những núi đá vôi trên vịnh", "source": "https://www.pexels.com/photo/7276642/" },
+    { "code": "DEMO-NB", "file": "ninh-binh.jpg", "photoId": 30280829, "alt": "Thuyền nhỏ trên sông giữa đồng ruộng và núi đá vôi", "source": "https://www.pexels.com/photo/30280829/" }
+  ]
+}
