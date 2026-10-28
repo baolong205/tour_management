@@ -12,6 +12,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequirePermissions } from '../../common/auth/permissions.decorator.js';
 import { UpsertSystemSettingDto } from './dto/system.dto.js';
 import { SystemSettingService } from './system-setting.service.js';
+import { Public } from '../../common/auth/public.decorator.js';
 
 /**
  * Cấu hình động của hệ thống (key/value JSON).
@@ -23,6 +24,19 @@ import { SystemSettingService } from './system-setting.service.js';
 @Controller('system/settings')
 export class SystemSettingController {
   constructor(private readonly systemSettingService: SystemSettingService) { }
+
+  @Public()
+  @Get('public-info')
+  async publicInfo() {
+    const [contact, bank] = await Promise.all([this.systemSettingService.get('site.contact'), this.systemSettingService.get('payment.bank')]);
+    const contactValue = contact?.value as Record<string, unknown> | undefined;
+    const bankValue = bank?.value as Record<string, unknown> | undefined;
+    const string = (value: unknown) => typeof value === 'string' ? value : '';
+    return {
+      contact: { email: string(contactValue?.email), phone: string(contactValue?.phone), address: string(contactValue?.address) },
+      bank: { bankName: string(bankValue?.bankName), accountName: string(bankValue?.accountName), accountNumber: string(bankValue?.accountNumber) },
+    };
+  }
 
   @Get()
   @RequirePermissions('system:setting')

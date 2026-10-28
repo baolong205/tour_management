@@ -1,0 +1,104 @@
+/* Standalone customer authentication layout, based on the supplied TourGo reference. */
+.destination-login { min-height: 100svh; display: grid; grid-template-columns: 62% 38%; background: #f5faff; position: relative; }
+.login-landscape { position: relative; isolation: isolate; min-height: 100svh; color: #fff; padding: 29px 7% 35px; display: flex; flex-direction: column; }
+.login-background { position: absolute; inset: 0; height: 100%; width: 100%; z-index: -2; object-fit: cover; object-position: 48% center; }
+.login-landscape:after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #03477f80 0%, #063d6266 34%, #023e5266 70%, #063c3a33 100%); z-index: -1; }
+.login-header { display: flex; align-items: center; gap: 28px; position: relative; z-index: 2; }
+.customer-site .login-header .tourgo-brand { color: #fff; font-size: 29px; gap: 7px; }
+.login-header .tourgo-brand svg { filter: brightness(0) invert(1); width: 46px; }
+.login-header nav { display: flex; align-items: center; justify-content: center; gap: 28px; flex: 1; font-size: 12px; white-space: nowrap; }
+.login-header nav a:hover { color: #90ffe1; }
+.login-register-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #ffffff0a; border: 1px solid #fff; color: #fff; padding: 11px 16px; border-radius: 10px; font-size: 12px; white-space: nowrap; }
+.login-register-link:hover { background: #ffffff24; }
+.login-story-copy { margin-block: auto; padding-block: 100px 135px; position: relative; z-index: 1; }
+.login-eyebrow { font-size: 12px; letter-spacing: 3px; color: #e0f1f6; }
+.customer-site .login-story-copy h1 { font-size: clamp(38px, 4.3vw, 65px); line-height: 1.12; letter-spacing: -1.8px; color: #fff; margin: 17px 0 28px; font-weight: 750; }
+.login-story-copy h1 em { font-style: normal; color: #7ef6d6; }
+.customer-site .login-story-copy > p { font-size: 18px; line-height: 1.65; color: #f0f8ff; margin-bottom: 48px; }
+.login-benefits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; max-width: 720px; }
+.login-benefits > div { display: flex; gap: 12px; align-items: flex-start; }
+.login-benefits > div > span { width: 47px; height: 47px; border: 1px solid #ffffffb0; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; background: #ffffff10; }
+.login-benefits strong { display: block; font-size: 14px; line-height: 1.5; font-weight: 600; margin-bottom: 7px; }
+.login-benefits small { display: block; color: #d3eaf1; font-size: 11px; line-height: 1.5; }
+.login-photo-credit { position: relative; font-size: 10px; color: #e2edf2; }
+.login-photo-credit a { text-decoration: underline; }
+.login-form-side { display: flex; align-items: center; justify-content: center; padding: 65px 28px; position: relative; background: #f5faff; }
+.login-form-side:before { content: ''; position: absolute; top: -5%; bottom: -5%; width: 90px; left: -45px; border-radius: 50%; background: #f5faff; }
+.customer-site .login-card { position: relative; width: 100%; max-width: 515px; background: #fff; border: 1px solid #f0f5fc; border-radius: 19px; padding: 35px 35px 24px; box-shadow: 0 8px 45px #3c699307; }
+.customer-site .login-card > .brand { display: flex; justify-content: center; font-size: 29px; margin-bottom: 27px; }
+.customer-site .login-card h2 { font-size: 25px; text-align: center; letter-spacing: -.6px; margin: 0 0 12px; }
+.customer-site .login-card .login-intro { text-align: center; font-size: 13px; color: #61718c; line-height: 1.8; margin: 0 0 30px; }
+.login-card form { display: grid; gap: 17px; }
+.customer-site .login-card label { display: grid; gap: 8px; font-size: 12px; font-weight: 600; color: #15233c; margin: 0; }
+.login-input { display: flex; align-items: center; border: 1px solid #d6e0ed; border-radius: 10px; padding: 0 13px; gap: 11px; color: #526581; min-height: 48px; background: #fff; box-shadow: 0 1px 3px #27456803; }
+.login-input:focus-within { border-color: #0068ff; box-shadow: 0 0 0 3px #0068ff0d; }
+.customer-site .login-input input { width: 100%; min-width: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 12px 0; font-size: 12px; font-weight: 400; color: #243451; min-height: 46px; }
+.customer-site .login-input input:focus { box-shadow: none; outline: none; }
+.customer-site .login-input input::placeholder { color: #6b7c96; opacity: 1; }
+.password-toggle { display: inline-flex; border: 0; background: transparent; color: #5e6f8c; padding: 6px 0 6px 4px; }
+.login-options { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: -2px; }
+.login-options > span { display: inline-flex; align-items: center; gap: 5px; color: #50627d; font-size: 10px; }
+.login-options > a { color: #0068ff; white-space: nowrap; }
+.customer-site .login-submit { display: flex; justify-content: center; gap: 15px; width: 100%; min-height: 54px; background: linear-gradient(110deg, #0875ff, #0060f5); border-radius: 10px; font-size: 15px; font-weight: 650; box-shadow: 0 4px 10px #0068ff13; }
+.login-divider { display: flex; gap: 15px; align-items: center; color: #71809a; font-size: 12px; margin: 23px 0 19px; }
+.login-divider:before, .login-divider:after { content: ''; height: 1px; background: #dde5ef; flex: 1; }
+.login-social { display: grid; gap: 12px; }
+.login-social button { display: flex; align-items: center; justify-content: center; gap: 18px; min-height: 48px; background: #fff; border: 1px solid #d7e0ed; border-radius: 10px; color: #18243d; font-size: 13px; }
+.login-social button:disabled { opacity: .75; }
+.google-symbol { color: #4285f4; font-size: 24px; font-weight: 750; font-family: Arial, sans-serif; }
+.facebook-symbol { display: grid; place-items: center; border-radius: 50%; width: 22px; height: 22px; background: #0866ff; color: white; font-size: 24px; font-family: Arial, sans-serif; font-weight: 700; line-height: 1; }
+.customer-site .login-social-note { font-size: 10px; text-align: center; color: #6d7e96; margin: 11px 0 0; }
+.customer-site .login-switch { text-align: center; font-size: 12px; margin: 24px 0 9px; color: #526581; }
+.login-switch .text-button { font-size: 12px; padding: 0 0 0 4px; color: #0068ff; }
+.login-internal { display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 10px; color: #6b7d98; margin-top: 16px; }
+.login-password-help { font-size: 10px; color: #64758e; }
+.login-site { overflow: clip; }
+@media (min-width: 1450px) {
+  .login-form-side { padding-inline: 25px; }
+  .customer-site .login-card { padding: 38px 39px 27px; }
+  .customer-site .login-card .login-intro { font-size: 14px; }
+  .customer-site .login-card label, .customer-site .login-input input { font-size: 13px; }
+  .login-input { min-height: 50px; }
+}
+@media (max-width: 1150px) {
+  .destination-login { grid-template-columns: 55% 45%; }
+  .login-landscape { padding-inline: 28px; }
+  .login-header { flex-wrap: wrap; gap: 15px; }
+  .login-header nav { order: 3; flex-basis: 100%; justify-content: flex-start; gap: 25px; }
+  .login-register-link { margin-left: auto; }
+  .login-benefits { grid-template-columns: 1fr; gap: 20px; }
+  .login-benefits strong { margin-bottom: 2px; }
+  .login-benefits > div > span { width: 40px; height: 40px; }
+  .login-story-copy { padding-block: 65px; }
+  .customer-site .login-story-copy > p { font-size: 15px; margin-bottom: 30px; }
+  .login-form-side { padding: 35px 20px; }
+  .customer-site .login-card { padding: 30px 24px 24px; }
+  .login-form-side:before { width: 50px; left: -25px; }
+  .login-options { flex-wrap: wrap; }
+}
+@media (max-width: 760px) {
+  .destination-login { grid-template-columns: 1fr; }
+  .login-landscape { min-height: 0; padding: 20px 24px 40px; }
+  .login-header { flex-wrap: nowrap; gap: 10px; }
+  .login-header nav { display: none; }
+  .customer-site .login-header .tourgo-brand { font-size: 25px; }
+  .login-story-copy { padding: 50px 0 20px; margin: 0; }
+  .login-eyebrow { font-size: 9px; letter-spacing: 2px; }
+  .customer-site .login-story-copy h1 { font-size: clamp(34px, 7vw, 50px); margin-block: 15px 20px; }
+  .customer-site .login-story-copy > p { font-size: 13px; margin-bottom: 0; }
+  .login-benefits { display: none; }
+  .login-photo-credit { font-size: 8px; margin-top: 10px; }
+  .login-form-side { padding: 0 16px 35px; }
+  .login-form-side:before { display: none; }
+  .customer-site .login-card { margin-top: -13px; max-width: 520px; padding: 28px 24px 23px; }
+  .customer-site .login-card > .brand { margin-bottom: 22px; }
+  .customer-site .login-card h2 { font-size: 24px; }
+}
+@media (max-width: 360px) {
+  .login-landscape { padding-inline: 18px; }
+  .login-register-link { font-size: 11px; padding: 9px 11px; }
+  .customer-site .login-header .tourgo-brand { font-size: 23px; }
+  .customer-site .login-card { padding-inline: 18px; }
+  .customer-site .login-card h2 { font-size: 22px; }
+  .login-desktop-break { display: none; }
+}

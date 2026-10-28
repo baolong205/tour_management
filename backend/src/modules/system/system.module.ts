@@ -15,6 +15,11 @@ import { EmailTemplate } from './entities/email-template.entity.js';
 import { SystemSetting } from './entities/system-setting.entity.js';
 import { SystemSettingController } from './system-setting.controller.js';
 import { SystemSettingService } from './system-setting.service.js';
+import { ReportController } from './report.controller.js';
+import { Booking } from '../booking/entities/booking.entity.js';
+import { Tour } from '../catalog/entities/tour.entity.js';
+import { Payment } from '../payment/entities/payment.entity.js';
+import { Refund } from '../payment/entities/refund.entity.js';
 
 /**
  * Cấu hình & nội dung hệ thống: nhật ký thao tác, banner, mẫu email, cấu hình động.
@@ -27,7 +32,7 @@ import { SystemSettingService } from './system-setting.service.js';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AuditLog, Banner, EmailTemplate, SystemSetting, User]),
+    TypeOrmModule.forFeature([AuditLog, Banner, EmailTemplate, SystemSetting, User, Booking, Tour, Payment, Refund]),
     NotificationModule,
   ],
   controllers: [
@@ -35,6 +40,7 @@ import { SystemSettingService } from './system-setting.service.js';
     BannerController,
     EmailTemplateController,
     SystemSettingController,
+    ReportController,
   ],
   providers: [
     AuditLogService,

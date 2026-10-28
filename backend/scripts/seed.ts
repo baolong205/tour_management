@@ -121,6 +121,15 @@ async function bootstrap(): Promise<void> {
     const dataSource = app.get(DataSource);
     const roles = await seedRoles(dataSource);
     await seedAdmin(dataSource, roles);
+    if (process.env.STAFF_EMAIL && process.env.STAFF_PASSWORD) {
+      const repo = dataSource.getRepository(User);
+      const email = process.env.STAFF_EMAIL.trim().toLowerCase();
+      if (!await repo.findOne({ where: { email } })) {
+        if (process.env.STAFF_PASSWORD.length < 8) throw new Error('STAFF_PASSWORD cần ít nhất 8 ký tự');
+        await repo.save(repo.create({ email, fullName: 'Nhân viên CSKH', passwordHash: await bcrypt.hash(process.env.STAFF_PASSWORD, 12), status: UserStatus.ACTIVE, roles: [roles.get(RoleName.STAFF)!] }));
+        console.log(`Staff: đã tạo ${email}`);
+      }
+    }
     console.log('\nSeed hoàn tất.');
   } finally {
     await app.close();

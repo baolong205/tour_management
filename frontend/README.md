@@ -28,6 +28,19 @@ Nếu backend dùng cổng khác, sửa `API_PROXY_TARGET` trong `.env` rồi kh
 
 ## Hiệu ứng giao diện
 
+## Bổ sung chức năng khách hàng / Admin / STAFF (28/10/2026)
+
+Đã thêm hồ sơ, khôi phục mật khẩu demo, thông báo, thanh toán/chứng từ, đánh giá, CSKH và workspace quản trị theo quyền. Xem đầy đủ trạng thái và giới hạn tại 
+
+Các trang mới: `#/account`, `#/forgot-password`, `#/notifications`, `#/support`, `#/reviews`, `#/payment/:bookingId`, `#/admin`.
+
+Lưu ý: chưa gửi email thật, chưa VietQR/cổng thanh toán thật, báo cáo CSV và in/lưu PDF qua trình duyệt; một số biểu mẫu quản trị nâng cao dùng JSON. Cần khởi động lại backend sau cập nhật và đăng nhập lại để nhận vai trò/quyền mới.
+
+### Hiệu ứng 3D
+
+- Chuyển động 3D: thẻ tour nghiêng tối đa 6° theo chuột, ánh sáng trên thẻ và ảnh dịch chuyển tạo chiều sâu; banner nghiêng nhẹ tối đa 2°, ảnh/chữ parallax và nút có bóng nổi.
+- Tilt chỉ chạy với chuột trên thiết bị hỗ trợ hover và khi không bật giảm chuyển động; cập nhật qua requestAnimationFrame, tự reset khi rời chuột, cuộn, resize, mất focus hoặc đổi tùy chọn chuyển động. Không dùng WebGL hay thư viện bổ sung.
+
 - Hiệu ứng vào trang, tiêu đề banner xuất hiện lần lượt, ảnh banner phóng nhẹ một lần.
 - Các thẻ tour và khối nội dung xuất hiện khi vào vùng nhìn; hỗ trợ cả dữ liệu API tải bất đồng bộ.
 - Hover/nhấn cho nút, ảnh, danh mục; hiệu ứng mở menu và hộp thoại.

@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  Allow,
   IsDateString,
   IsInt,
   IsOptional,
@@ -184,6 +185,7 @@ export class UpsertSystemSettingDto {
   key: string;
 
   @ApiProperty({ example: 15, description: 'Giá trị JSON (number/boolean/object/string)' })
+  @Allow()
   value: unknown;
 
   @ApiPropertyOptional({ example: 'Số phút giữ chỗ trước khi hết hạn', maxLength: 255 })

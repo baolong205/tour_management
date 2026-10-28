@@ -27,6 +27,7 @@ import { SupplierModule } from './modules/supplier/supplier.module.js';
 import { SystemModule } from './modules/system/system.module.js';
 import { UploadModule } from './modules/upload/upload.module.js';
 import { UsersModule } from './modules/users/users.module.js';
+import { SupportModule } from './modules/support/support.module.js';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { UsersModule } from './modules/users/users.module.js';
       { name: 'default', ttl: 60_000, limit: 300 },
     ]),
     UsersModule,
+    SupportModule,
     AuthModule,
     // Catalog → Schedule → Booking: phụ thuộc một chiều, không tạo vòng lặp module.
     CatalogModule,

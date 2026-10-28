@@ -57,6 +57,7 @@ import { AuditLog } from '../../modules/system/entities/audit-log.entity.js';
 import { Banner } from '../../modules/system/entities/banner.entity.js';
 import { EmailTemplate } from '../../modules/system/entities/email-template.entity.js';
 import { SystemSetting } from '../../modules/system/entities/system-setting.entity.js';
+import { SupportTicket } from '../../modules/support/support.entity.js';
 
 /**
  * 36 entity của hệ thống, theo đúng thứ tự "cha trước con" cho dễ đọc.
@@ -112,4 +113,5 @@ export const ALL_ENTITIES_ARRAY = [
   Banner,
   EmailTemplate,
   SystemSetting,
+  SupportTicket,
 ] satisfies MixedList<Function | string | EntitySchema>;

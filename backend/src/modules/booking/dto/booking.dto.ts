@@ -4,6 +4,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEmail,
   IsEnum,
@@ -187,6 +188,7 @@ export class RequestCancelDto {
 export class ProcessCancelDto {
   @ApiProperty({ example: true })
   @Type(() => Boolean)
+  @IsBoolean()
   approve: boolean;
 
   @ApiPropertyOptional({ maxLength: 500, description: 'Bắt buộc khi từ chối' })

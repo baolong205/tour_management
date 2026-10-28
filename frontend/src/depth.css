@@ -1,0 +1,50 @@
+/* Individual rotate/translate compose with existing reveal transforms. */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .tour-grid, .benefits, .journey-banner, .hero { perspective: 1200px; }
+  .tilt-surface {
+    rotate: var(--tilt-axis-x, 0) var(--tilt-axis-y, 1) 0 var(--tilt-angle, 0deg);
+    transition: rotate 420ms cubic-bezier(.2,.7,.25,1), transform 240ms ease, box-shadow 240ms ease;
+    transform-origin: center;
+  }
+  .tilt-active { transition-duration: 100ms, 240ms, 240ms; }
+  .tour-card.tilt-active { box-shadow: 0 20px 38px -18px #123e3860; }
+  .tour-card.tilt-surface { position: relative; }
+  .tour-card.tilt-surface::after {
+    content: ''; position: absolute; inset: 0; z-index: 2; border-radius: inherit;
+    background: radial-gradient(circle at var(--light-x, 50%) var(--light-y, 50%), #fff5, transparent 62%);
+    opacity: 0; pointer-events: none; transition: opacity 280ms ease;
+  }
+  .tour-card.tilt-active::after { opacity: .55; }
+  .tour-card.tilt-surface .tour-image img {
+    translate: var(--depth-x, 0px) var(--depth-y, 0px);
+    scale: 1.035;
+    transition: translate 220ms ease-out, transform 650ms ease, scale 400ms ease;
+  }
+  .hero.tilt-surface { rotate: none; }
+  .hero.tilt-surface .hero-content {
+    translate: var(--depth-x, 0px) var(--depth-y, 0px) 14px;
+    transition: translate 350ms ease-out;
+  }
+  .hero.tilt-surface .hero-landscape {
+    translate: calc(var(--depth-x, 0px) * -.65) calc(var(--depth-y, 0px) * -.65);
+    inset: -12px;
+    transition: translate 450ms ease-out;
+  }
+  .journey-banner.tilt-surface { transform-style: preserve-3d; }
+  .journey-banner.tilt-surface > div:first-child {
+    translate: var(--depth-x, 0px) var(--depth-y, 0px) 18px;
+    transition: translate 300ms ease-out;
+  }
+  .journey-banner.tilt-surface .compass-art {
+    rotate: 0 1 0 var(--tilt-angle, 0deg);
+    transition: rotate 350ms ease-out;
+  }
+  .benefit.tilt-surface .benefit-icon { box-shadow: 0 12px 22px -13px #087f7555; }
+  .btn { box-shadow: 0 3px 0 #064c4525; }
+  .btn:hover:not(:disabled) { box-shadow: 0 5px 0 #064c4525, 0 12px 22px #087f7518; }
+  .btn:active:not(:disabled) { box-shadow: 0 1px 0 #064c4525; }
+}
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .tilt-surface, .tilt-surface * { rotate: none !important; translate: none !important; }
+  .tour-card.tilt-surface::after { display: none; }
+}

@@ -60,9 +60,14 @@ export class TourService {
 
     this.applyFilters(qb, query, onlyPublished);
 
-    const sortBy = query.sortBy ?? 'createdAt';
+    const sortBy = ['createdAt', 'name', 'avgRating', 'durationDays', 'price'].includes(query.sortBy ?? '') ? query.sortBy! : 'createdAt';
     const sortOrder = (query.sortOrder ?? 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-    qb.orderBy(`tour.${sortBy}`, sortOrder);
+    if (sortBy === 'price') {
+      qb.addSelect(this.priceExpression(), 'tour_price_sort')
+        .setParameter('priceToday', this.todayInVietnam())
+        .orderBy('tour_price_sort', sortOrder);
+    } else qb.orderBy(`tour.${sortBy}`, sortOrder);
+    qb.addOrderBy('tour.id', 'ASC');
     qb.skip((page - 1) * limit).take(limit);
 
     const [tours, total] = await qb.getManyAndCount();
@@ -255,6 +260,10 @@ export class TourService {
 
   // ===== nội bộ: truy vấn =====
 
+  private priceExpression(): string {
+    return `(SELECT MIN(ds.price_adult) FROM departure_schedules ds WHERE ds.tour_id = tour.id AND ds.status = 'OPEN' AND ds.start_date >= :priceToday)`;
+  }
+
   private applyFilters(qb: SelectQueryBuilder<Tour>, query: QueryToursDto, onlyPublished: boolean): void {
     if (onlyPublished) {
       qb.andWhere('tour.status = :published', { published: TourStatus.PUBLISHED });
@@ -264,7 +273,7 @@ export class TourService {
 
     if (query.search) {
       const keyword = `%${query.search.trim()}%`;
-      qb.andWhere('(tour.name LIKE :keyword OR tour.code LIKE :keyword OR tour.summary LIKE :keyword)', { keyword });
+      qb.andWhere('(tour.name LIKE :keyword OR tour.code LIKE :keyword OR tour.summary LIKE :keyword OR EXISTS (SELECT 1 FROM tour_destinations td JOIN destinations d ON d.id = td.destination_id WHERE td.tour_id = tour.id AND d.name LIKE :keyword))', { keyword });
     }
 
     if (query.departureCity) {
@@ -277,6 +286,14 @@ export class TourService {
         'EXISTS (SELECT 1 FROM tour_categories tc WHERE tc.tour_id = tour.id AND tc.category_id = :categoryId)',
         { categoryId: query.categoryId },
       );
+    }
+    if (query.destination) qb.andWhere('EXISTS (SELECT 1 FROM tour_destinations td JOIN destinations d ON d.id = td.destination_id WHERE td.tour_id = tour.id AND d.name LIKE :destination)', { destination: `%${query.destination.trim()}%` });
+    if (query.minDays !== undefined) qb.andWhere('tour.durationDays >= :minDays', { minDays: query.minDays });
+    if (query.maxDays !== undefined) qb.andWhere('tour.durationDays <= :maxDays', { maxDays: query.maxDays });
+    if (query.minPrice !== undefined || query.maxPrice !== undefined) {
+      qb.setParameter('priceToday', this.todayInVietnam());
+      if (query.minPrice !== undefined) qb.andWhere(`${this.priceExpression()} >= :minPrice`, { minPrice: query.minPrice });
+      if (query.maxPrice !== undefined) qb.andWhere(`${this.priceExpression()} <= :maxPrice`, { maxPrice: query.maxPrice });
     }
   }
 

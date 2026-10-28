@@ -6,6 +6,7 @@ import { RoleName } from '../enums/index.js';
  * rồi chạy lại `npm run db:seed`.
  */
 export const PERMISSION_DEFINITIONS: { code: string; description: string }[] = [
+  { code: 'support:manage', description: 'Tiếp nhận và trả lời yêu cầu CSKH' },
   // người dùng & phân quyền
   { code: 'user:read', description: 'Xem danh sách và hồ sơ người dùng' },
   { code: 'user:manage', description: 'Cập nhật, khóa, xóa người dùng' },
@@ -45,31 +46,20 @@ const GUIDE_PERMISSIONS = ['tour:read', 'schedule:read', 'booking:read', 'guide:
 
 const STAFF_PERMISSIONS = [
   'user:read',
-  'user:manage',
-  'role:manage',
   'tour:read',
-  'tour:write',
-  'tour:delete',
-  'category:write',
   'schedule:read',
-  'schedule:write',
   'booking:read',
   'booking:create',
   'booking:confirm',
   'booking:cancel',
   'payment:read',
-  'payment:refund',
-  'guide:assign',
-  'supplier:manage',
-  'promotion:manage',
-  'review:moderate',
   'notification:manage',
-  'report:read',
+  'support:manage',
   'file:upload',
 ];
 
 /** Admin = đủ quyền của Staff + nhóm quyền hệ thống (không lưu quan hệ kế thừa trong DB). */
-const ADMIN_PERMISSIONS = [...STAFF_PERMISSIONS, 'guide:attend', 'incident:manage', 'system:setting'];
+const ADMIN_PERMISSIONS = PERMISSION_DEFINITIONS.map(permission => permission.code);
 
 export const ROLE_PERMISSIONS: Record<RoleName, string[]> = {
   [RoleName.CUSTOMER]: CUSTOMER_PERMISSIONS,

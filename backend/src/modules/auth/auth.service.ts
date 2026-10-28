@@ -226,10 +226,18 @@ export class AuthService {
 
   // ===================================================================
   // Hồ sơ
+  async updateProfile(user: AuthenticatedUser, dto: { fullName?: string; phone?: string; avatarUrl?: string }): Promise<PublicUser> {
+    const entity = await this.usersService.getOrFail(user.id);
+    if (dto.fullName !== undefined) entity.fullName = dto.fullName.trim();
+    if (dto.phone !== undefined) entity.phone = dto.phone.trim() || null;
+    if (dto.avatarUrl !== undefined) entity.avatarUrl = dto.avatarUrl.trim() || null;
+    return this.usersService.toPublicUser(await this.usersService.save(entity), user.permissions);
+  }
+
   // ===================================================================
 
   async me(user: AuthenticatedUser): Promise<PublicUser> {
-    const entity = await this.usersService.findById(user.id);
+    const entity = await this.usersService.getOrFail(user.id);
     if (!entity) throw new UnauthorizedException('Tài khoản không tồn tại');
     return this.usersService.toPublicUser(entity, user.permissions);
   }
@@ -257,6 +265,9 @@ export class AuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ sent: true; resetToken?: string }> {
+    if (this.config.get<string>('NODE_ENV') === 'production') {
+      throw new BadRequestException('Chưa cấu hình dịch vụ gửi email khôi phục. Vui lòng liên hệ hỗ trợ.');
+    }
     const user = await this.usersService.findByEmail(dto.email);
     // Luôn trả thành công để tránh dò email tồn tại.
     if (!user) return { sent: true };

@@ -197,6 +197,7 @@ export class PaymentService {
   async create(dto: CreatePaymentDto, actor: AuthenticatedUser): Promise<PaymentView> {
     const booking = await this.bookingService.getOrFail(dto.bookingId);
     const canOperate = actor.permissions.includes('payment:read');
+    if (dto.method === PaymentMethod.OFFICE && !canOperate) throw new ForbiddenException('Chỉ nhân viên được xác nhận thu tiền tại quầy');
     if (!canOperate && booking.customerId !== actor.id) {
       throw new ForbiddenException('Bạn không có quyền thanh toán cho booking này');
     }

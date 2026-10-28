@@ -1,0 +1,47 @@
+
+> backend@0.0.1 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90mD:/nam4/project/tour_management/backend[39m
+
+ [32m✓[39m src/app.controller.spec.ts [2m([22m[2m1 test[22m[2m)[22m[33m 1247[2mms[22m[39m
+       [33m[2m✓[22m[39m trả về thông điệp trạng thái của API [33m 1239[2mms[22m[39m
+ [32m✓[39m src/modules/support/support.service.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/common/auth/auth.constants.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/modules/system/banner.service.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 689[2mms[22m[39m
+       [33m[2m✓[22m[39m ném BadRequestException khi endAt <= startAt [33m 612[2mms[22m[39m
+[Nest] 25248  - 16:23:24 28/10/2026   ERROR [AuditLogService] Không ghi được nhật ký x cho y:z
+[Nest] 25248  - 16:23:24 28/10/2026   ERROR [AuditLogService] Error: DB down
+    at D:/nam4/project/tour_management/backend/src/modules/system/audit-log.service.spec.ts:55:35
+    at file:///D:/nam4/project/tour_management/backend/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///D:/nam4/project/tour_management/backend/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///D:/nam4/project/tour_management/backend/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///D:/nam4/project/tour_management/backend/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///D:/nam4/project/tour_management/backend/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///D:/nam4/project/tour_management/backend/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///D:/nam4/project/tour_management/backend/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64
+ [32m✓[39m src/modules/notification/notification.service.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1017[2mms[22m[39m
+       [33m[2m✓[22m[39m lưu thông báo và trả view với isRead = false [33m 858[2mms[22m[39m
+ [32m✓[39m src/modules/system/audit-log.service.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 768[2mms[22m[39m
+       [33m[2m✓[22m[39m lưu bản ghi với các trường mặc định null [33m 682[2mms[22m[39m
+ [32m✓[39m src/modules/system/email-template.service.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 852[2mms[22m[39m
+       [33m[2m✓[22m[39m chuẩn hóa code thành chữ HOA và lưu [33m 750[2mms[22m[39m
+ [32m✓[39m src/modules/supplier/supplier.service.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 582[2mms[22m[39m
+       [33m[2m✓[22m[39m trim tên và mặc định active = true [33m 506[2mms[22m[39m
+ [32m✓[39m src/modules/supplier/resource-assignment.service.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 536[2mms[22m[39m
+       [33m[2m✓[22m[39m ném NotFoundException khi lịch khởi hành không tồn tại [33m 486[2mms[22m[39m
+ [32m✓[39m src/modules/system/system-setting.service.spec.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 934[2mms[22m[39m
+       [33m[2m✓[22m[39m trả giá trị số khi value là number [33m 801[2mms[22m[39m
+ [32m✓[39m src/database/verify-entities.spec.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 480[2mms[22m[39m
+ [32m✓[39m src/modules/review/review.service.spec.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 320[2mms[22m[39m
+ [32m✓[39m src/modules/booking/booking.dto.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/modules/payment/payment.access.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 7[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m14 passed[39m[22m[90m (14)[39m
+[2m      Tests [22m [1m[32m84 passed[39m[22m[90m (84)[39m
+[2m   Start at [22m 16:23:17
+[2m   Duration [22m 10.59s[2m (transform 4.76s, setup 0ms, import 73.73s, tests 7.48s, environment 8ms)[22m
+

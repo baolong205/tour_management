@@ -1,5 +1,5 @@
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import type { AuthenticatedUser } from '../../common/auth/auth.types.js';
@@ -10,6 +10,7 @@ import { LoginDto } from './dto/login.dto.js';
 import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto, VerifyEmailDto } from './dto/password.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
+import { UpdateUserDto } from '../users/dto/update-user.dto.js';
 
 function metaOf(req: Request): RequestMeta {
   const forwarded = req.headers['x-forwarded-for'];
@@ -86,6 +87,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Thông tin người dùng hiện tại kèm vai trò và quyền' })
   me(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.me(user);
+  }
+
+  @ApiBearerAuth()
+  @Patch('me')
+  @ApiOperation({ summary: 'Cập nhật hồ sơ của chính tôi' })
+  updateMe(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateUserDto) {
+    return this.authService.updateProfile(user, dto);
   }
 
   @ApiBearerAuth()

@@ -196,6 +196,11 @@ export class UpdateTourStatusDto {
 }
 
 export class QueryToursDto {
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) minPrice?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) maxPrice?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(365) minDays?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(365) maxDays?: number;
+  @IsOptional() @IsString() @MaxLength(150) destination?: string;
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()
   @IsInt()
@@ -231,13 +236,13 @@ export class QueryToursDto {
   @MaxLength(100)
   departureCity?: string;
 
-  @ApiPropertyOptional({ enum: ['createdAt', 'name', 'avgRating'], default: 'createdAt' })
+  @ApiPropertyOptional({ enum: ['createdAt', 'name', 'avgRating', 'durationDays', 'price'], default: 'createdAt' })
   @IsOptional()
-  @IsString()
-  sortBy?: 'createdAt' | 'name' | 'avgRating';
+  @IsEnum({ createdAt: 'createdAt', name: 'name', avgRating: 'avgRating', durationDays: 'durationDays', price: 'price' })
+  sortBy?: 'createdAt' | 'name' | 'avgRating' | 'durationDays' | 'price';
 
   @ApiPropertyOptional({ enum: ['ASC', 'DESC'], default: 'DESC' })
   @IsOptional()
-  @IsString()
+  @IsEnum({ ASC: 'ASC', DESC: 'DESC' })
   sortOrder?: 'ASC' | 'DESC';
 }

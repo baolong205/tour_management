@@ -1,0 +1,61 @@
+PASS Desktop home: no horizontal overflow
+Screenshot: C:\Users\USER\AppData\Local\Temp\vivu-travel-desktop.png
+PASS search form retains Vietnamese query
+PASS home category, departure city and destination navigation
+PASS Desktop listing: no horizontal overflow
+PASS explore: range validation, filter chips, sorting and empty reset
+PASS Desktop detail: no horizontal overflow
+PASS Mobile home 390px: no horizontal overflow
+PASS Mobile listing 390px: no horizontal overflow
+PASS Mobile open filters 390px: no horizontal overflow
+PASS Mobile detail 390px: no horizontal overflow
+PASS Customer login 390px: no horizontal overflow
+Screenshot: C:\Users\USER\AppData\Local\Temp\vivu-travel-mobile.png
+PASS Mobile home 320px: no horizontal overflow
+PASS Mobile listing 320px: no horizontal overflow
+PASS Mobile open filters 320px: no horizontal overflow
+PASS Mobile detail 320px: no horizontal overflow
+PASS Customer login 320px: no horizontal overflow
+PASS New registration desktop: no horizontal overflow
+Login screenshot: C:\Users\USER\AppData\Local\Temp\tourgo-login-desktop.png
+PASS New login 390px: no horizontal overflow
+PASS New registration 390px: no horizontal overflow
+PASS New login 320px: no horizontal overflow
+PASS New registration 320px: no horizontal overflow
+PASS new login: password visibility, registration switch, honest disabled social options
+PASS internal login is separate from customer layout
+PASS Fixture booking desktop: no horizontal overflow
+Fixture screenshot: C:\Users\USER\AppData\Local\Temp\tourgo-booking-desktop.png
+PASS Fixture booking 390px: no horizontal overflow
+PASS Fixture account navigation 390px: no horizontal overflow
+PASS Fixture passenger table 390px: no horizontal overflow
+PASS Fixture booking 320px: no horizontal overflow
+PASS Fixture account navigation 320px: no horizontal overflow
+PASS Fixture passenger table 320px: no horizontal overflow
+PASS Checkout desktop: no horizontal overflow
+PASS Checkout 390px: no horizontal overflow
+PASS Checkout 320px: no horizontal overflow
+PASS Booking success desktop: no horizontal overflow
+PASS Booking success 390px: no horizontal overflow
+PASS Booking success 320px: no horizontal overflow
+PASS booking success: API code/total, focus, next steps, payment/detail links and responsive layout
+PASS checkout fixture: add/remove passengers, quote invalidation, unavailable seats, errors, submit payload, success and missing schedule; no database changes
+PASS Payment desktop: no horizontal overflow
+PASS Payment 390px: no horizontal overflow
+PASS Payment 320px: no horizontal overflow
+PASS payment fixture: methods, missing bank, create payload without amount, proof pending, mock consent/success, closed booking, retry and mobile; no real payments
+PASS Staff desktop: no horizontal overflow
+PASS Staff booking desktop: no horizontal overflow
+PASS Staff bookings detail 390px: no horizontal overflow
+PASS Staff bookings detail 320px: no horizontal overflow
+PASS Staff schedules desktop: no horizontal overflow
+PASS Staff schedules detail 390px: no horizontal overflow
+PASS Staff schedules detail 320px: no horizontal overflow
+PASS staff operations: date filters, booking detail, confirm, approve/reject cancellation with strict booleans, validation errors, schedule checkpoints, readonly permissions and responsive tables; no real mutations
+PASS Staff 390px: no horizontal overflow
+PASS Staff open menu 390px: no horizontal overflow
+PASS Staff 320px: no horizontal overflow
+PASS Staff open menu 320px: no horizontal overflow
+PASS staff/admin separate shells, redirects, permission allowlist, forbidden tab, customer denial and mobile menu
+PASS fixture: booking totals, tabs, image gallery, account mobile menu, unavailable invoice
+PASS no uncaught browser runtime errors

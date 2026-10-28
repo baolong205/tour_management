@@ -1,0 +1,64 @@
+.payment-main { display: grid; gap: 19px; min-width: 0; }
+.payment-demo-note { display: flex; align-items: flex-start; gap: 12px; padding: 15px 18px; border: 1px solid #d7e7fc; background: #edf5ff; border-radius: 9px; color: #397dce; margin-bottom: 23px; }
+.payment-demo-note strong { font-size: 12px; color: #335b8e; }
+.customer-site .payment-demo-note p { font-size: 11px; color: #6482a5; margin: 3px 0 0; }
+.payment-method-form fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.payment-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.payment-method { display: flex; align-items: center; gap: 13px; padding: 17px; background: #fff; border: 1px solid #dfe7f3; border-radius: 8px; cursor: pointer; margin-bottom: 12px; }
+.payment-method.selected { background: #f3f8ff; border-color: #0068ff; box-shadow: 0 0 0 1px #0068ff0a; }
+.payment-method input { width: 16px; height: 16px; margin: 0; accent-color: #0068ff; flex-shrink: 0; }
+.payment-method-icon { width: 43px; height: 43px; display: grid; place-items: center; background: #e8f1ff; color: #0068ff; border-radius: 9px; flex-shrink: 0; }
+.payment-method-icon.method-momo { background: #fbeaf5; color: #b82a81; }
+.payment-method-copy { min-width: 0; }
+.payment-method-copy > strong { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; font-size: 13px; color: #29496e; }
+.payment-method-copy strong small { background: #fff1d9; color: #a77526; border-radius: 4px; padding: 1px 6px; font-size: 9px; font-weight: 500; }
+.payment-method-copy > span { display: block; font-size: 11px; color: #7b8ea7; margin-top: 5px; }
+.payment-pending-note, .payment-review-note { display: flex; align-items: flex-start; gap: 8px; background: #fff8e9; padding: 11px; border-radius: 6px; font-size: 11px; color: #a0803f; }
+.customer-site .payment-small-note { font-size: 10px; color: #8698ae; margin: 10px 0 0; text-align: center; }
+.customer-site .payment-create { font-size: 13px; margin-top: 6px; min-height: 45px; }
+.payment-bank-rows { margin: 0; }
+.payment-bank-rows > div { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-bottom: 1px solid #edf1f7; font-size: 12px; }
+.payment-bank-rows dt { color: #8595ab; }
+.payment-bank-rows dd { color: #30547e; font-weight: 600; margin: 0; text-align: right; overflow-wrap: anywhere; min-width: 0; }
+.customer-site .payment-bank-warning { font-size: 10px; color: #8799af; line-height: 1.8; margin: 15px 0 0; }
+.payment-refresh { display: inline-flex; gap: 5px; align-items: center; margin-left: auto; color: #0068ff; border: 0; background: #edf5ff; border-radius: 6px; padding: 7px; font-size: 10px; }
+.payment-transaction { border: 1px solid #e3ebf5; border-radius: 8px; padding: 17px; margin-top: 13px; }
+.payment-transaction-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 13px; }
+.customer-site .payment-transaction-heading h3 { font-size: 13px; color: #345779; margin: 0 0 7px; }
+.payment-transaction-heading > strong { font-size: 16px; color: #234d80; white-space: nowrap; }
+.payment-status { display: inline-block; font-size: 10px; border-radius: 20px; padding: 3px 9px; background: #f1f4f9; color: #778ca8; }
+.payment-status-pending, .payment-status-proof_submitted { background: #fff5df; color: #ad7e25; }
+.payment-status-success { background: #e6f8ef; color: #179766; }
+.payment-status-failed, .payment-status-expired { background: #fff0ef; color: #cc6760; }
+.customer-site .payment-reference { color: #94a3b8; font-size: 10px; margin: 12px 0 0; overflow-wrap: anywhere; }
+.customer-site .payment-proof-note { font-size: 11px; color: #7d91aa; overflow-wrap: anywhere; margin-top: 10px; }
+.payment-proof-form { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e0e8f3; }
+.customer-site .payment-proof-form > p { font-size: 11px; color: #7e90aa; }
+.payment-proof-form label { display: block; color: #4c698e; font-size: 11px; margin: 14px 0 8px; }
+.payment-proof-form label em { font-style: normal; color: #eb5757; }
+.customer-site .payment-proof-form input, .customer-site .payment-proof-form textarea { display: block; width: 100%; border: 1px solid #dce5f1; border-radius: 7px; padding: 11px; font-size: 12px; margin-top: 7px; background: #fff; }
+.payment-proof-form > small { color: #99a7ba; font-size: 10px; }
+.customer-site .payment-proof-form .btn, .customer-site .payment-simulate { font-size: 11px; padding: 9px 13px; min-height: 39px; margin-top: 10px; }
+.payment-booking-code { display: flex; justify-content: space-between; gap: 10px; background: #f1f6fe; padding: 10px; border-radius: 5px; margin-bottom: 17px; font-size: 11px; color: #7c93b1; }
+.payment-booking-code strong { color: #2467bd; overflow-wrap: anywhere; min-width: 0; }
+.payment-outcome, .payment-closed { display: flex; align-items: flex-start; gap: 14px; }
+.payment-outcome > span { display: grid; place-items: center; background: #e5f8ee; border-radius: 50%; width: 46px; height: 46px; color: #14a56e; flex-shrink: 0; }
+.customer-site .payment-outcome h2, .customer-site .payment-closed h2 { font-size: 17px; color: #2a517b; margin: 0 0 8px; }
+.customer-site .payment-outcome p, .customer-site .payment-closed p { font-size: 12px; color: #8093aa; margin: 0; }
+.payment-outcome a { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: #0068ff; margin-top: 12px; }
+.payment-closed > svg { color: #b7965b; }
+.payment-empty { text-align: center; padding: 20px; color: #a6bedb; }
+.customer-site .payment-empty p { font-size: 12px; color: #93a5bc; margin: 10px 0 0; }
+.payment-page .checkout-total { flex-wrap: wrap; }
+@media (max-width: 760px) {
+  .payment-method { padding: 12px; gap: 9px; }
+  .payment-method-icon { width: 33px; height: 33px; }
+  .payment-method-copy > strong { font-size: 12px; }
+  .payment-method-copy > span { font-size: 10px; }
+  .payment-history .checkout-card-title { flex-wrap: wrap; }
+  .payment-refresh { margin-left: 49px; }
+  .payment-transaction { padding: 13px; }
+  .payment-transaction-heading { flex-wrap: wrap; }
+  .payment-bank-rows > div { font-size: 11px; gap: 12px; }
+  .payment-proof-form .btn, .payment-simulate { width: 100%; }
+}

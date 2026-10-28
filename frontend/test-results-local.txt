@@ -1,0 +1,171 @@
+
+> tour-management-frontend@1.0.0 test
+> node --test tests/*.test.js
+
+TAP version 13
+# Subtest: API integration contract
+    # Subtest: reads plain response and successful envelope
+    ok 1 - reads plain response and successful envelope
+      ---
+      duration_ms: 80.4032
+      type: 'test'
+      ...
+    # Subtest: uses authorization and serializes DTO unchanged
+    ok 2 - uses authorization and serializes DTO unchanged
+      ---
+      duration_ms: 2.8513
+      type: 'test'
+      ...
+    # Subtest: rotates tokens and retries unauthorized business request
+    ok 3 - rotates tokens and retries unauthorized business request
+      ---
+      duration_ms: 4.4575
+      type: 'test'
+      ...
+    # Subtest: surfaces validation errors and empty responses
+    ok 4 - surfaces validation errors and empty responses
+      ---
+      duration_ms: 2.8545
+      type: 'test'
+      ...
+    # Subtest: favorites uses personal authenticated list and delete endpoint
+    ok 5 - favorites uses personal authenticated list and delete endpoint
+      ---
+      duration_ms: 6.6503
+      type: 'test'
+      ...
+    # Subtest: preserves abort errors and reports network failures
+    ok 6 - preserves abort errors and reports network failures
+      ---
+      duration_ms: 1.7682
+      type: 'test'
+      ...
+    # Subtest: uses local fallback and rejects unsafe image schemes
+    ok 7 - uses local fallback and rejects unsafe image schemes
+      ---
+      duration_ms: 0.7347
+      type: 'test'
+      ...
+    1..7
+ok 1 - API integration contract
+  ---
+  duration_ms: 110.2077
+  type: 'test'
+  ...
+# Subtest: six demo tours have local JPEGs and a recorded source
+ok 2 - six demo tours have local JPEGs and a recorded source
+  ---
+  duration_ms: 30.2955
+  type: 'test'
+  ...
+# Subtest: homepage and promotional banner reference local photos
+ok 3 - homepage and promotional banner reference local photos
+  ---
+  duration_ms: 9.5736
+  type: 'test'
+  ...
+# Subtest: customer cannot enter staff workspace merely with tour:read
+ok 4 - customer cannot enter staff workspace merely with tour:read
+  ---
+  duration_ms: 3.8417
+  type: 'test'
+  ...
+# Subtest: CSV is Excel compatible and neutralizes spreadsheet formulas
+ok 5 - CSV is Excel compatible and neutralizes spreadsheet formulas
+  ---
+  duration_ms: 4.1491
+  type: 'test'
+  ...
+# Subtest: every management section has explicit API and permission
+ok 6 - every management section has explicit API and permission
+  ---
+  duration_ms: 0.6802
+  type: 'test'
+  ...
+# Subtest: form bodies preserve numeric zero, boolean false and JSON; omit blank optional numbers
+ok 7 - form bodies preserve numeric zero, boolean false and JSON; omit blank optional numbers
+  ---
+  duration_ms: 61.2867
+  type: 'test'
+  ...
+# Subtest: content remains untouched without observer support
+ok 8 - content remains untouched without observer support
+  ---
+  duration_ms: 3.8444
+  type: 'test'
+  ...
+# Subtest: reveal observes initial and asynchronously added elements once
+ok 9 - reveal observes initial and asynchronously added elements once
+  ---
+  duration_ms: 3.5908
+  type: 'test'
+  ...
+# Subtest: reduced motion disables observers and supports live preference changes
+ok 10 - reduced motion disables observers and supports live preference changes
+  ---
+  duration_ms: 1.1884
+  type: 'test'
+  ...
+# Subtest: tilt is neutral at center, bounded at edges, safe for zero dimensions
+ok 11 - tilt is neutral at center, bounded at edges, safe for zero dimensions
+  ---
+  duration_ms: 4.0909
+  type: 'test'
+  ...
+# Subtest: delegated tilt batches frames, resets and cleans listeners
+ok 12 - delegated tilt batches frames, resets and cleans listeners
+  ---
+  duration_ms: 3.4822
+  type: 'test'
+  ...
+# Subtest: touch, reduced motion and coarse pointers never start tilt
+ok 13 - touch, reduced motion and coarse pointers never start tilt
+  ---
+  duration_ms: 2.8892
+  type: 'test'
+  ...
+# Subtest: missing browser support leaves content untouched
+ok 14 - missing browser support leaves content untouched
+  ---
+  duration_ms: 0.9481
+  type: 'test'
+  ...
+# Subtest: money distinguishes unavailable prices and free tickets
+ok 15 - money distinguishes unavailable prices and free tickets
+  ---
+  duration_ms: 56.6944
+  type: 'test'
+  ...
+# Subtest: query includes valid values, omits empty filters, encodes Vietnamese
+ok 16 - query includes valid values, omits empty filters, encodes Vietnamese
+  ---
+  duration_ms: 1.0795
+  type: 'test'
+  ...
+# Subtest: date-only values stay on the calendar date
+ok 17 - date-only values stay on the calendar date
+  ---
+  duration_ms: 9.9158
+  type: 'test'
+  ...
+# Subtest: login continuation accepts only internal routes
+ok 18 - login continuation accepts only internal routes
+  ---
+  duration_ms: 0.6453
+  type: 'test'
+  ...
+# Subtest: all backend booking statuses have Vietnamese labels
+ok 19 - all backend booking statuses have Vietnamese labels
+  ---
+  duration_ms: 0.7127
+  type: 'test'
+  ...
+1..19
+# tests 26
+# suites 0
+# pass 26
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 411.5283

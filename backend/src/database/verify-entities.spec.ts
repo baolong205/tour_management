@@ -48,9 +48,9 @@ describe('Entity metadata (không cần DB)', () => {
 
   it('nạp đủ entity, không entity nào thiếu metadata', () => {
     // 36 class entity khai báo tường minh
-    expect(ALL_ENTITIES.length).toBe(36);
+    expect(ALL_ENTITIES.length).toBe(37);
     // + 3 bảng nối do @JoinTable sinh ra: user_roles, role_permissions, tour_categories
-    expect(dataSource.entityMetadatas.length).toBe(39);
+    expect(dataSource.entityMetadatas.length).toBe(40);
 
     const tables = dataSource.entityMetadatas.map((m) => m.tableName);
     expect(tables).toEqual(

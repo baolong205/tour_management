@@ -18,7 +18,16 @@ export function AuthProvider({ children }) {
   }, []);
   async function login(email, password) {
     const result = await api('/auth/login', { method: 'POST', body: { email, password } });
-    saveSession(result); setUser(result.user);
+    saveSession(result);
+    // Login responses may contain tokens only. Resolve authoritative roles before routing.
+    try {
+      const profile = await api('/auth/me');
+      saveSession({ ...getSession(), user: profile });
+      setUser(profile);
+      return profile;
+    } catch (error) {
+      saveSession(null); setUser(null); throw error;
+    }
   }
   async function logout() {
     try { await api('/auth/logout', { method: 'POST' }); } finally { saveSession(null); setUser(null); }

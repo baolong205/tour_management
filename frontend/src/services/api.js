@@ -14,8 +14,12 @@ async function parse(response) {
   let body;
   try { body = text ? JSON.parse(text) : null; } catch { throw new Error('Phản hồi API không hợp lệ. Kiểm tra địa chỉ backend.'); }
   if (!response.ok) {
-    const error = new Error(Array.isArray(body?.message) ? body.message.join('. ') : body?.message || `Yêu cầu thất bại (${response.status})`);
+    const message = Array.isArray(body?.message) ? body.message.join('. ') : body?.message || `Yêu cầu thất bại (${response.status})`;
+    const details = Array.isArray(body?.details) ? body.details.filter(detail => typeof detail?.message === 'string').map(detail => detail.field ? `${detail.field}: ${detail.message}` : detail.message) : [];
+    const error = new Error([message, ...details].join('. '));
     error.status = response.status;
+    error.details = body?.details;
+    error.requestId = body?.requestId;
     throw error;
   }
   return body?.success === true && 'data' in body ? body.data : body;

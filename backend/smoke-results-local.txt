@@ -1,0 +1,2 @@
+Demo payment is simulated data only and retained for audit. Demo booking cancelled to release seats.
+PASS: 57 live HTTP checks. Demo customer/staff/ticket retained with marker 21cf99eb. Only clearly named demo booking/payment created; no non-demo booking modified.
