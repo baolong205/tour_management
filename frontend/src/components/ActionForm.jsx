@@ -14,7 +14,7 @@ export default function ActionForm({ path, method = 'POST', fields, initial = {}
       onSuccess?.(result);
     } catch (error) { setError(error.message); } finally { setBusy(false); }
   }
-  return <form onSubmit={submit}>
+  return <form className="action-form" onSubmit={submit}>
     {fields.map(field => <label key={field.name} hidden={field.type === 'hidden'}>{field.label}
       {field.options ? <select name={field.name} defaultValue={String(initial[field.name] ?? field.defaultValue ?? '')} required={field.required}>{!field.required && <option value="">Không chọn</option>}{field.options.map(option => <option key={option.value ?? option} value={option.value ?? option}>{option.label ?? option}</option>)}</select>
         : ['textarea', 'json'].includes(field.type) ? <textarea name={field.name} rows={field.type === 'json' ? 7 : 3} defaultValue={field.type === 'json' ? JSON.stringify(initial[field.name] ?? field.defaultValue ?? {}, null, 2) : initial[field.name] ?? ''} required={field.required} minLength={field.minLength} maxLength={field.maxLength} />

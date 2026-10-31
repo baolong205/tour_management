@@ -15,5 +15,7 @@ import './checkout.css';
 import './payment.css';
 import './booking-success.css';
 import './staff.css';
+import './admin.css';
+import './records.css';
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><AuthProvider><App /></AuthProvider></React.StrictMode>);

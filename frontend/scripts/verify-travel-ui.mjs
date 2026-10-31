@@ -198,6 +198,21 @@ try {
     window.fetch = async (input, options) => {
       const url = new URL(typeof input === 'string' ? input : input.url, location.origin);
       if (url.pathname.startsWith('/api/')) {
+        if (window.recordsFixture) {
+          const state = window.recordsFixture;
+          const response = body => new Response(JSON.stringify(body), {status:200,headers:{'Content-Type':'application/json'}});
+          if (url.pathname === '/api/users') {
+            state.userQuery = url.search;
+            if (state.userError) return new Response(JSON.stringify({message:'Không tải được danh sách'}), {status:500,headers:{'Content-Type':'application/json'}});
+            return response({items:state.emptyUsers ? [] : [state.user],total:state.emptyUsers ? 0 : 21});
+          }
+          if (url.pathname === '/api/users/record-user' && options?.method === 'PATCH') { const body=JSON.parse(options.body); state.requests.push({path:url.pathname,body}); Object.assign(state.user,body); return response(state.user); }
+          if (['/api/support','/api/support/me'].includes(url.pathname) && (!options?.method || options.method==='GET')) return response({items:[state.ticket],total:1});
+          if (url.pathname === '/api/support/record-ticket/replies') { const body=JSON.parse(options.body); state.requests.push({path:url.pathname,body}); state.ticket.replies.push({authorName:'Kiểm thử',message:body.message,createdAt:'2026-10-29T09:00:00Z'}); return response(state.ticket); }
+          if (url.pathname === '/api/notifications') return response({items:state.notes,total:state.notes.length});
+          if (url.pathname === '/api/notifications/record-note/read') { state.notes[0].isRead=true; return response({success:true}); }
+          if (['/api/reviews/me','/api/reviews'].includes(url.pathname)) return response({items:[{id:'record-review',tourName:'Hạ Long',rating:5,status:'PENDING',comment:'Chuyến đi rất tốt',userName:'Khách kiểm thử'}],total:1});
+        }
         if (window.staffOps) {
           const state = window.staffOps;
           const response = (body, status = 200) => new Response(JSON.stringify(body), {status,headers:{'Content-Type':'application/json'}});
@@ -228,6 +243,10 @@ try {
           if (url.pathname === '/api/schedules') { state.lastScheduleQuery = url.search; return response({items:[state.schedule],total:1}); }
         }
         if (url.pathname === '/api/auth/me' && window.fixtureUser) return new Response(JSON.stringify(window.fixtureUser), {status:200, headers:{'Content-Type':'application/json'}});
+        if (url.pathname === '/api/reports/overview' && window.fixtureUser) {
+          const body = window.adminReportError ? {message:'Báo cáo tạm thời không khả dụng'} : {tourCount:124,bookingCount:892,pendingBookings:12,received:425600000,refunded:1000000,net:424600000,items:[{period:(url.searchParams.get('fromDate') || '2026-01-01').slice(0,4)+'-08',received:185400000,refunded:0,net:185400000,transactions:12}]};
+          return new Response(JSON.stringify(body), {status:window.adminReportError ? 500 : 200,headers:{'Content-Type':'application/json'}});
+        }
         if (window.fixtureUser && window.staffData && (!options?.method || options.method === 'GET')) {
           let body;
           if (url.pathname === '/api/bookings') body = {items: url.searchParams.get('status') ? [] : [fixtureRoutes['/api/bookings/ui-booking']], total: url.searchParams.get('status') ? 0 : 1};
@@ -530,6 +549,95 @@ try {
   await evaluate(`window.fixtureUser = {...window.fixtureUser, roles:['ADMIN'],permissions:['report:read']}; window.dispatchEvent(new Event('auth-change'));`);
   await waitFor(() => evaluate('location.hash === "#/admin" && !!document.querySelector(".admin-shell")'), 'admin separate redirect');
   assert.equal(await evaluate('!!document.querySelector(".staff-shell")'), false);
+  await waitFor(() => evaluate('document.querySelectorAll(".ao-metric").length===3 && document.querySelectorAll(".ao-bars .ao-bar-column").length===12'), 'admin limited dashboard');
+  assert.equal(await evaluate('!!document.querySelector(".ao-recent, .ao-popular")'), false);
+  await evaluate(`window.fixtureUser = {...window.fixtureUser,permissions:['report:read','booking:read','user:read','schedule:read','tour:write','support:manage']}; window.dispatchEvent(new Event('auth-change'));`);
+  await waitFor(() => evaluate('document.querySelectorAll(".ao-metric").length===4 && document.querySelectorAll(".ao-recent tbody tr").length===1'), 'admin full dashboard');
+  assert.ok(await evaluate('document.querySelector(".ao-recent").textContent.includes("2.500.000")'));
+  await send('Emulation.setDeviceMetricsOverride', {width:1440,height:1080,deviceScaleFactor:1,mobile:false});
+  await noOverflow('Admin dashboard desktop');
+  const adminShot = await send('Page.captureScreenshot', {format:'png',captureBeyondViewport:false});
+  await writeFile(join(tmpdir(),'tourgo-admin-desktop.png'), Buffer.from(adminShot.data,'base64'));
+  await evaluate('document.querySelector(".admin-collapse-toggle").click()');
+  assert.equal(await evaluate('document.querySelector(".admin-shell").classList.contains("admin-collapsed")'),true);
+  await evaluate('document.querySelector(".admin-collapse-toggle").click(); document.querySelector(".ao-recent tbody a").click()');
+  await waitFor(() => evaluate('!!document.querySelector(".ops-bookings .ops-detail")'), 'admin booking detail deep link');
+  await evaluate('location.hash="/admin"');
+  await waitFor(() => evaluate('!!document.querySelector(".admin-overview")'), 'admin return overview');
+  for (const width of [390,320]) {
+    await send('Emulation.setDeviceMetricsOverride', {width,height:844,deviceScaleFactor:1,mobile:true});
+    await noOverflow('Admin dashboard '+width+'px');
+    await evaluate('document.querySelector(".admin-menu-toggle").click()');
+    assert.equal(await evaluate('document.querySelector(".admin-menu-toggle").getAttribute("aria-expanded")'),'true');
+    await noOverflow('Admin menu '+width+'px');
+    await evaluate('document.querySelector(".admin-menu-toggle").click()');
+  }
+  await evaluate('window.adminReportError=true; location.hash="/admin?tab=reports"');
+  await waitFor(() => evaluate('!!document.querySelector(".admin-content [role=alert]")'), 'admin report error');
+  await evaluate('window.adminReportError=false; document.querySelector(".admin-content [role=alert] button").click()');
+  await waitFor(() => evaluate('!!document.querySelector(".report-filters") && !!document.querySelector(".stat-grid")'), 'admin report retry');
+  console.log('PASS admin redesign: real contracts, limited permissions, booking deep links, collapse, mobile and report retry; no real mutations');
+  await evaluate(`window.recordsFixture={requests:[],user:{id:'record-user',fullName:'Khách kiểm thử hiện đại',email:'record@example.test',phone:'0901234567',status:'ACTIVE',roles:['CUSTOMER']},ticket:{id:'record-ticket',subject:'Cần tư vấn lịch đón',customerName:'Khách kiểm thử',createdAt:'2026-10-29T08:00:00Z',status:'OPEN',message:'Tôi muốn biết điểm đón và giờ tập trung.',replies:[]},notes:[{id:'record-note',title:'Thông báo kiểm thử',body:'Đơn đã được tiếp nhận.',createdAt:'2026-10-29T08:00:00Z',isRead:false,payload:{bookingId:'ui-booking'}}]}; window.fixtureUser.permissions.push('user:manage','role:manage'); window.dispatchEvent(new Event('auth-change')); location.hash='/admin?tab=customers';`);
+  await waitFor(() => evaluate('document.querySelectorAll(".records-table tbody tr").length===1'), 'compact customers table');
+  assert.equal(await evaluate('document.querySelectorAll(".users-page details").length'),0);
+  await evaluate('document.querySelector(".records-toolbar input").value="Khách"; document.querySelector(".records-toolbar select").value="ACTIVE"; document.querySelector(".records-toolbar").requestSubmit()');
+  await waitFor(() => evaluate('new URLSearchParams(window.recordsFixture.userQuery).get("status")==="ACTIVE"'), 'customer server filters');
+  await evaluate('document.querySelector(".records-table .record-action").click()');
+  await waitFor(() => evaluate('!!document.querySelector("dialog[open] input[name=fullName]")'), 'customer action dialog');
+  assert.equal(await evaluate('document.body.style.overflow'),'hidden');
+  await evaluate('setReactInput(document.querySelector("dialog input[name=fullName]"),"Khách đã cập nhật"); document.querySelector("dialog form").requestSubmit()');
+  await waitFor(() => evaluate('window.recordsFixture.user.fullName==="Khách đã cập nhật"'), 'customer fixture update');
+  await evaluate('document.querySelector("dialog .record-dialog-close").click()');
+  await waitFor(() => evaluate('!document.querySelector("dialog[open]")'), 'close dialog');
+  await send('Emulation.setDeviceMetricsOverride', {width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await noOverflow('Compact admin customers desktop');
+  const usersShot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+  await writeFile(join(tmpdir(),'tourgo-customers-modern.png'),Buffer.from(usersShot.data,'base64'));
+  for (const width of [390,320]) {
+    await send('Emulation.setDeviceMetricsOverride', {width,height:844,deviceScaleFactor:1,mobile:true});
+    await noOverflow('Compact customers '+width+'px');
+    await evaluate('document.querySelector(".records-table .record-action").click()');
+    await waitFor(() => evaluate('!!document.querySelector("dialog[open]")'), 'mobile customer dialog');
+    await noOverflow('Customer dialog '+width+'px');
+    await evaluate('document.querySelector("dialog .record-dialog-close").click()');
+    await waitFor(() => evaluate('!document.querySelector("dialog")'), 'mobile dialog unmounted');
+  }
+  await evaluate(`window.fixtureUser={...window.fixtureUser,roles:['STAFF'],permissions:['user:read','support:manage']}; window.dispatchEvent(new Event('auth-change')); location.hash='/staff?tab=customers'`);
+  await waitFor(() => evaluate('!!document.querySelector(".staff-shell")'), 'records staff session');
+  await evaluate('location.hash="/staff?tab=customers"');
+  await waitFor(() => evaluate('!!document.querySelector(".staff-shell .records-table")'), 'staff shared customer table');
+  await evaluate('document.querySelector(".records-table .record-action").click()');
+  await waitFor(() => evaluate('!!document.querySelector("dialog[open]")'), 'staff readonly dialog');
+  assert.equal(await evaluate('document.querySelectorAll("dialog form").length'),0);
+  await evaluate('document.querySelector("dialog .record-dialog-close").click(); location.hash="/staff?tab=support"');
+  await waitFor(() => evaluate('!!document.querySelector(".support-page .record-card")'), 'staff support compact');
+  await evaluate('document.querySelector(".support-page .record-card .record-action").click()');
+  await waitFor(() => evaluate('!!document.querySelector("dialog form")'), 'staff support conversation');
+  await noOverflow('Staff support dialog 320px');
+  await evaluate('document.querySelector("dialog .record-dialog-close").click()');
+  await evaluate(`window.fixtureUser={...window.fixtureUser,roles:['CUSTOMER'],permissions:['booking:create']}; window.dispatchEvent(new Event('auth-change')); location.hash='/notifications'`);
+  await pause(500);
+  await evaluate('location.hash="/notifications"');
+  await waitFor(() => evaluate('document.querySelectorAll(".notification-row").length===1'), 'customer notifications feed');
+  await noOverflow('Customer notifications 320px');
+  await evaluate('document.querySelector(".notification-row .record-action").click()');
+  await waitFor(() => evaluate('window.recordsFixture.notes[0].isRead && !!document.querySelector(".notification-row.read")'), 'mark notification read fixture');
+  await evaluate('location.hash="/support"');
+  await waitFor(() => evaluate('!!document.querySelector(".support-page .records-toolbar .record-action")'), 'customer support');
+  await evaluate('document.querySelector(".support-page .record-card .record-action").click()');
+  await waitFor(() => evaluate('!!document.querySelector("dialog textarea")'), 'customer support dialog');
+  await evaluate('document.querySelector("dialog textarea").value="Cảm ơn, xin tư vấn thêm giờ đón."; document.querySelector("dialog form").requestSubmit()');
+  await waitFor(() => evaluate('window.recordsFixture.requests.some(item=>item.path.includes("/replies"))'), 'customer support reply fixture');
+  await evaluate('document.querySelector("dialog .record-dialog-close").click(); location.hash="/reviews"');
+  await waitFor(() => evaluate('!!document.querySelector(".reviews-page .record-action")'), 'customer review edit action');
+  await evaluate('document.querySelector(".reviews-page .record-action").click()');
+  await waitFor(() => evaluate('!!document.querySelector("dialog[open] input[name=rating]")'), 'review edit dialog');
+  await noOverflow('Customer review dialog 320px');
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await waitFor(() => evaluate('!document.querySelector("dialog[open]")'), 'dialog Escape keyboard');
+  await waitFor(() => evaluate('document.body.style.overflow!=="hidden"'), 'dialog restores background scrolling');
+  console.log('PASS compact cross-role UI: customer table/filters/update, readonly staff, dialogs, mobile, notifications, support reply, review edit and Escape; fixture mutations only');
   await evaluate(`window.fixtureUser = {...window.fixtureUser, roles:['CUSTOMER'],permissions:['booking:create']}; window.dispatchEvent(new Event('auth-change')); location.hash='/staff';`);
   await waitFor(() => evaluate('!!document.querySelector(".management-root .state") && !document.querySelector(".staff-shell")'), 'customer staff denied');
   console.log('PASS staff/admin separate shells, redirects, permission allowlist, forbidden tab, customer denial and mobile menu');

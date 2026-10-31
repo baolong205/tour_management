@@ -6,10 +6,10 @@ import { money, queryString, statusLabels } from '../utils.js';
 import { Pagination, State } from '../components/UI.jsx';
 import TourForm from '../components/TourForm.jsx';
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ initialSearch = '' }) {
   const { can } = useAuth();
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [status, setStatus] = useState('');
   const [revision, setRevision] = useState(0);
   const [form, setForm] = useState(null);

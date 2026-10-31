@@ -12,6 +12,7 @@ export const workspaceSections = [
   { key: 'support', label: 'Hỗ trợ CSKH', permission: 'support:manage', group: 'NGHIỆP VỤ', icon: 'users' },
   { key: 'notify', label: 'Gửi thông báo', permission: 'notification:manage', group: 'NGHIỆP VỤ', icon: 'arrow' },
   { key: 'staff', label: 'Nhân viên & vai trò', permission: 'role:manage', group: 'HỆ THỐNG', icon: 'users' },
+  { key: 'reports', label: 'Thống kê doanh thu', permission: 'report:read', group: 'BÁO CÁO', icon: 'grid' },
 ];
 
 export function permittedSections(user) {
