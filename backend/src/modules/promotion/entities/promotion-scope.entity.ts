@@ -25,7 +25,7 @@ export class PromotionScope extends BaseEntity {
 
   // Dùng chuỗi 'Promotion' + import type để tránh circular dependency (TDZ lúc runtime)
   @ManyToOne('Promotion', (promotion: any) => promotion.scopes, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'promotion_id' })
+  @JoinColumn({ name: 'promotion_id', foreignKeyConstraintName: 'fk_promotion_scopes_promotion' })
   promotion?: Relation<Promotion>;
 
   @Column({ name: 'scope_type', type: 'varchar', length: 20 })

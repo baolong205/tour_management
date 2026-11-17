@@ -13,6 +13,7 @@ import { RolesGuard } from './common/auth/roles.guard.js';
 import { ALL_ENTITIES } from './common/entities/entity-list.js';
 import databaseConfig from './config/database.config.js';
 import jwtConfig from './config/jwt.config.js';
+import { ALL_MIGRATIONS } from './database/migrations/index.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { BookingModule } from './modules/booking/booking.module.js';
 import { CatalogModule } from './modules/catalog/catalog.module.js';
@@ -55,7 +56,7 @@ import { SupportModule } from './modules/support/support.module.js';
         // module của nó chưa được import (tránh lỗi quan hệ "Entity metadata not found").
         autoLoadEntities: true,
         entities: ALL_ENTITIES,
-        migrations: ['dist/database/migrations/*.js'],
+        migrations: ALL_MIGRATIONS,
       }),
     }),
     // Bật scheduler toàn cục cho các @Cron trong MaintenanceService.

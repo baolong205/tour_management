@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../services/api.js';
-import { loginDestination } from '../routing.js';
+import { loginDestination } from '../routing/index.js';
 import { Icon } from '../components/UI.jsx';
 import CustomerLogin from '../components/CustomerLogin.jsx';
 

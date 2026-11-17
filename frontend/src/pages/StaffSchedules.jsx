@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import ScheduleBookings from '../components/ScheduleBookings.jsx';
-import PickupEditor from '../components/PickupEditor.jsx';
+import { useEffect, useRef, useState } from 'react';
+import ScheduleBookings from '../features/schedules/components/ScheduleBookings.jsx';
+import PickupEditor from '../features/schedules/components/PickupEditor.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useApi } from '../hooks.js';
+import { useApi } from '../hooks/use-api.js';
 import { api } from '../services/api.js';
-import { date, money, queryString } from '../utils.js';
-import { scheduleLabels, validateDateRange } from '../staff-operations.js';
-import { management } from '../management.js';
+import { date, money, queryString } from '../lib/utils.js';
+import { scheduleLabels, validateDateRange } from '../features/staff/operations.js';
+import { management } from '../features/management/catalog.js';
 import ActionForm from '../components/ActionForm.jsx';
 import { Icon, Pagination, State } from '../components/UI.jsx';
-import { OperationBadge, OperationEmpty, OperationFacts, OperationHeader } from '../components/StaffOperations.jsx';
+import { OperationBadge, OperationEmpty, OperationFacts, OperationHeader } from '../features/staff/components/StaffOperations.jsx';
 
 export default function StaffSchedules({ initialSelected = '' }) {
   const { can } = useAuth();

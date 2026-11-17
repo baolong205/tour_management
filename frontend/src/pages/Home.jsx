@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
-import { queryString } from '../utils.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
+import { queryString } from '../lib/utils.js';
 import TourCard from '../components/TourCard.jsx';
 import Banners from '../components/Banners.jsx';
 import PublicPromotions from '../components/PublicPromotions.jsx';
 import { Icon, State } from '../components/UI.jsx';
-import { cleanTourFilter } from '../tour-search.js';
+import { cleanTourFilter } from '../features/tours/search.js';
 
 const destinations = [
   { name: 'Ninh Bình', image: 'ninh-binh', caption: 'Miền di sản' },

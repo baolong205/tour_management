@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../services/api.js';
-import { money, queryString, statusLabels } from '../utils.js';
+import { money, queryString, statusLabels } from '../lib/utils.js';
 import { Pagination, State } from '../components/UI.jsx';
-import TourForm from '../components/TourForm.jsx';
+import TourForm from '../features/tours/components/TourForm.jsx';
 
 export default function AdminDashboard({ initialSearch = '' }) {
   const { can } = useAuth();

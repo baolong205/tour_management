@@ -79,7 +79,7 @@ Từ terminal ở thư mục gốc, chạy:
 ```powershell
 cd backend
 npm.cmd run db:check
-npm.cmd run db:sync
+npm.cmd run db:migrate
 npm.cmd run db:seed
 npm.cmd run db:seed:tours
 npm.cmd run db:seed:images
@@ -88,8 +88,9 @@ npm.cmd run db:seed:destinations
 cd ..
 ```
 
-Chỉ chạy `db:sync` khi database còn trống. Nếu database đã có bảng, bỏ bước này;
-khi cần cập nhật schema, dùng migration theo [README dự án](../README.md).
+`db:migrate` tạo bảng trên database mới hoặc áp dụng migration còn thiếu cho
+schema đầy đủ đã cài đặt; không cần bỏ bước này khi database đã có dữ liệu.
+Xem [hướng dẫn database](../docs/DATABASE.md) cho nâng cấp và trường hợp schema thiếu.
 `db:seed:promotions` thêm 10 mã ưu đãi; `db:seed:destinations` liên kết điểm đến
 cho các tour demo còn thiếu.
 

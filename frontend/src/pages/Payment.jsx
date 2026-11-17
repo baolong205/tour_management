@@ -1,11 +1,11 @@
-import React, { useRef, useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useRef, useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { api, assetUrl } from '../services/api.js';
-import { date, money, statusLabels } from '../utils.js';
-import { paymentMethodLabels } from '../booking-view.js';
+import { date, money, statusLabels } from '../lib/utils.js';
+import { paymentMethodLabels } from '../features/booking/view.js';
 import { Icon, State } from '../components/UI.jsx';
-import InvoiceButton from '../components/InvoiceButton.jsx';
-import PaymentReceiptStatus from '../components/PaymentReceiptStatus.jsx';
+import InvoiceButton from '../features/payment/components/InvoiceButton.jsx';
+import PaymentReceiptStatus from '../features/payment/components/PaymentReceiptStatus.jsx';
 
 const labels = { PENDING: 'Chờ thanh toán', PROOF_SUBMITTED: 'Chờ đối chiếu chứng từ', SUCCESS: 'Đã thanh toán', FAILED: 'Thất bại', EXPIRED: 'Hết hạn', PARTIALLY_REFUNDED: 'Đã hoàn một phần', REFUNDED: 'Đã hoàn tiền' };
 const methods = [

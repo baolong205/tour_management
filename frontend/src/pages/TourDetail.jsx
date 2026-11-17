@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TourReviews } from './Reviews.jsx';
-import { useApi } from '../hooks.js';
+import { useApi } from '../hooks/use-api.js';
 import { api, assetUrl } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { date, money } from '../utils.js';
+import { date, money } from '../lib/utils.js';
 import { Icon, State } from '../components/UI.jsx';
 
 export default function TourDetail({ id }) {

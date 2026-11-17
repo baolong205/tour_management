@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Icon } from '../components/UI.jsx';
 

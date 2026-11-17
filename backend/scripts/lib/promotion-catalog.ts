@@ -1,5 +1,5 @@
 import type { EntityManager } from 'typeorm';
-import { PromotionType } from '../../src/common/enums/index.js';
+import { PromotionStatus, PromotionType } from '../../src/common/enums/index.js';
 import { Promotion } from '../../src/modules/promotion/entities/promotion.entity.js';
 
 export const PROMOTION_CATALOG = [
@@ -23,7 +23,7 @@ export async function seedPromotionCatalog(manager: EntityManager, now = new Dat
   let created = 0;
   for (const campaign of PROMOTION_CATALOG) {
     if (await repo.existsBy({ code: campaign.code })) continue;
-    await repo.save(repo.create({ ...campaign, usedCount: 0, active: true, validFrom, validTo }));
+    await repo.save(repo.create({ ...campaign, usedCount: 0, active: true, status: PromotionStatus.ACTIVE, validFrom, validTo }));
     created++;
   }
   return { created, skipped: PROMOTION_CATALOG.length - created };

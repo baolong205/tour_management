@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { popularTours, revenueMonths } from '../src/admin-dashboard.js';
+import { popularTours, revenueMonths } from '../src/features/admin/dashboard.js';
 
 test('admin revenue chart uses received money for exact year and zero fills months', () => {
   const months = revenueMonths([{ period: '2026-01', received: '100' }, { period: '2025-01', received: 999 }, { period: '2026-12', received: 20 }], 2026);

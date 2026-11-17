@@ -31,7 +31,7 @@ export async function api(path, { method = 'GET', body, signal, retry = true } =
     response = await fetch(`${BASE}${path}`, { method, signal, credentials: 'include', headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
   } catch (error) {
     if (error.name === 'AbortError') throw error;
-    throw new Error('Không thể kết nối máy chủ. Hãy kiểm tra backend và cấu hình API.');
+    throw new Error('Không thể kết nối máy chủ. Hãy kiểm tra backend và cấu hình API.', { cause: error });
   }
   if (response.status === 401 && retry && session?.refreshToken && !['/auth/login', '/auth/register', '/auth/refresh'].includes(path)) {
     if (!refreshing) refreshing = api('/auth/refresh', { method: 'POST', body: { refreshToken: session.refreshToken }, retry: false }).then(tokens => saveSession({ ...session, ...tokens })).catch(error => { saveSession(null); throw error; }).finally(() => { refreshing = null; });

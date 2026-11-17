@@ -1,4 +1,4 @@
-import { money } from './utils.js';
+import { money } from './lib/utils.js';
 
 const percent = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
 

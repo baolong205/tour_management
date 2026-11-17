@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loginDestination, routeForUser, isWorkspacePath } from '../src/routing.js';
-import { permittedSections, activeWorkspaceSection, workspaceSections } from '../src/workspace-navigation.js';
-import { permittedStaffSections, staffSections } from '../src/staff-navigation.js';
+import { loginDestination, routeForUser, isWorkspacePath } from '../src/routing/index.js';
+import { permittedSections, activeWorkspaceSection, workspaceSections } from '../src/features/workspace/navigation.js';
+import { permittedStaffSections, staffSections } from '../src/features/staff/navigation.js';
 
 const admin = { roles: ['ADMIN'], permissions: workspaceSections.map(section => section.permission) };
 const staff = { roles: ['STAFF'], permissions: ['booking:read', 'support:manage', 'payment:read', 'user:read', 'schedule:read'] };

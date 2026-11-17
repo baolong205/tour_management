@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { activeWorkspaceSection, permittedSections } from '../workspace-navigation.js';
+import { activeWorkspaceSection, permittedSections } from '../features/workspace/navigation.js';
 import { Icon } from './UI.jsx';
 import Brand from './Brand.jsx';
 

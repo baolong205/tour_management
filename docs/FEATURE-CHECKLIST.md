@@ -101,7 +101,9 @@ node dist/scripts/upgrade-customer-features.js
 node dist/scripts/seed.js
 ```
 
-Script upgrade chỉ CREATE TABLE IF NOT EXISTS support_tickets; script seed đồng bộ bộ quyền, không reset mật khẩu tài khoản đã tồn tại. KHÔNG chạy `npm run db:sync` trên dữ liệu có sẵn.
+Schema được nâng cấp qua `npm run db:migrate` trong `backend/`, gồm cả bảng hỗ trợ.
+Script upgrade cũ chuyển tiếp sang cùng quy trình migration; seed đồng bộ bộ quyền,
+không reset mật khẩu tài khoản đã tồn tại. Xem [DATABASE.md](DATABASE.md).
 
 Nếu DB đã có dữ liệu khuyến mãi cũ, chạy thêm migration + backfill sổ cái (cả hai đều idempotent):
 

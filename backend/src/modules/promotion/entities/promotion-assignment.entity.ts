@@ -12,13 +12,13 @@ export class PromotionAssignment extends BaseEntity {
 
   // 2. Dùng chuỗi 'Promotion' thay vì biến Promotion
   @ManyToOne('Promotion', (promotion: any) => promotion.assignments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'promotion_id' })
+  @JoinColumn({ name: 'promotion_id', foreignKeyConstraintName: 'fk_promotion_assignments_promotion' })
   promotion?: Promotion;
 
   @Column({ name: 'customer_id', type: 'char', length: 36, charset: 'ascii', collation: 'ascii_bin' })
   customerId: string;
 
-  @Column({ name: 'assigned_at', type: 'datetime', precision: 3 })
+  @Column({ name: 'assigned_at', type: 'datetime', precision: 3, default: () => 'CURRENT_TIMESTAMP(3)' })
   assignedAt: Date;
 
   @Column({ name: 'used_at', type: 'datetime', precision: 3, nullable: true })

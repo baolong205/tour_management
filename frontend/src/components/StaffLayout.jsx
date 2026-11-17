@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { permittedStaffSections } from '../staff-navigation.js';
+import { permittedStaffSections } from '../features/staff/navigation.js';
 import { Icon } from './UI.jsx';
 
 export default function StaffLayout({ path, params, children }) {

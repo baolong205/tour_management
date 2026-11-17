@@ -14,6 +14,9 @@ import { Invoice } from './entities/invoice.entity.js';
 import { Passenger } from './entities/passenger.entity.js';
 import { BookingMailService } from './services/booking-mail.service.js';
 import { InvoiceService } from './services/invoice.service.js';
+import { BookingPricingService } from './services/booking-pricing.service.js';
+import { BookingCancellationService } from './services/booking-cancellation.service.js';
+import { BookingReservationsService } from './services/booking-reservations.service.js';
 
 /**
  * Đặt tour + hủy + hóa đơn.
@@ -40,7 +43,7 @@ import { InvoiceService } from './services/invoice.service.js';
     SystemModule,
   ],
   controllers: [BookingController],
-  providers: [BookingService, InvoiceService, BookingMailService],
+  providers: [BookingService, InvoiceService, BookingMailService, BookingPricingService, BookingCancellationService, BookingReservationsService],
   exports: [BookingService, InvoiceService],
 })
 export class BookingModule { }

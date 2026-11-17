@@ -25,14 +25,14 @@ export class BookingDiscount extends BaseEntity {
   bookingId: string;
 
   @ManyToOne('Booking', { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'booking_id' })
+  @JoinColumn({ name: 'booking_id', foreignKeyConstraintName: 'fk_booking_discounts_booking' })
   booking?: Relation<Booking>;
 
   @Column({ name: 'promotion_id', type: 'char', length: 36, charset: 'ascii', collation: 'ascii_bin' })
   promotionId: string;
 
   @ManyToOne('Promotion', { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'promotion_id' })
+  @JoinColumn({ name: 'promotion_id', foreignKeyConstraintName: 'fk_booking_discounts_promotion' })
   promotion?: Relation<Promotion>;
 
   @Column({ name: 'code_snapshot', type: 'varchar', length: 40 })

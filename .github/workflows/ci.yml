@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Check ${{ matrix.app }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [backend, frontend, mobile]
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
+    env:
+      CI: "true"
+      EXPO_NO_TELEMETRY: "1"
+      EXPO_PUBLIC_API_URL: https://api.example.test/api
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ${{ matrix.app }}/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - if: matrix.app != 'mobile'
+        run: npm run build
+      - if: matrix.app == 'mobile'
+        run: npm run typecheck
+      - if: matrix.app == 'mobile'
+        run: npm run export:check -- --max-workers 2
+      - if: matrix.app == 'frontend'
+        name: Check root tooling
+        working-directory: .
+        run: npm test
+
+  integration:
+    name: Check MySQL migrations and workflows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-password
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_DATABASE: tour_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pci-only-password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      NODE_ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_USERNAME: root
+      DB_PASSWORD: ci-only-password
+      DB_DATABASE: tour_ci
+      DB_SYNCHRONIZE: "false"
+      JWT_SECRET: ci-only-access-secret-for-ephemeral-tests
+      JWT_REFRESH_SECRET: ci-only-refresh-secret-for-ephemeral-tests
+      PAYMENT_MOCK_SECRET: ci-only-payment-secret
+      MAIL_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --prefix backend
+      - name: Initialize the disposable CI database
+        run: npm run db:migrate --prefix backend
+      - run: npm run check:integration

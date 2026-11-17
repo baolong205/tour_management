@@ -28,7 +28,7 @@ export class PromotionRedemption extends BaseEntity {
   promotionId: string;
 
   @ManyToOne('Promotion', (promotion: any) => promotion.redemptions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'promotion_id' })
+  @JoinColumn({ name: 'promotion_id', foreignKeyConstraintName: 'fk_promotion_redemptions_promotion' })
   promotion?: Relation<Promotion>;
 
   @Column({ name: 'booking_id', type: 'char', length: 36, charset: 'ascii', collation: 'ascii_bin' })
@@ -36,7 +36,7 @@ export class PromotionRedemption extends BaseEntity {
 
   // Dùng chuỗi 'Booking' thay vì biến để tránh circular dependency (TDZ lúc runtime)
   @ManyToOne('Booking', { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'booking_id' })
+  @JoinColumn({ name: 'booking_id', foreignKeyConstraintName: 'fk_promotion_redemptions_booking' })
   booking?: Relation<Booking>;
 
   @Column({ name: 'customer_id', type: 'char', length: 36, charset: 'ascii', collation: 'ascii_bin' })
@@ -53,7 +53,7 @@ export class PromotionRedemption extends BaseEntity {
   @Column({ type: 'varchar', length: 20, default: PromotionRedemptionStatus.RESERVED })
   status: PromotionRedemptionStatus;
 
-  @Column({ name: 'reserved_at', type: 'datetime', precision: 3 })
+  @Column({ name: 'reserved_at', type: 'datetime', precision: 3, default: () => 'CURRENT_TIMESTAMP(3)' })
   reservedAt: Date;
 
   @Column({ name: 'confirmed_at', type: 'datetime', precision: 3, nullable: true })

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
-import { date, money, statusLabels } from '../utils.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
+import { date, money, statusLabels } from '../lib/utils.js';
 import { Icon, Pagination, State } from '../components/UI.jsx';
 
 export default function MyBookings() {

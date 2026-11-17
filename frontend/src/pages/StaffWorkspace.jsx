@@ -1,7 +1,6 @@
-import React from 'react';
 import StaffDashboard from './StaffDashboard.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { permittedStaffSections } from '../staff-navigation.js';
+import { permittedStaffSections } from '../features/staff/navigation.js';
 import StaffSchedules from './StaffSchedules.jsx';
 import StaffBookings from './StaffBookings.jsx';
 import StaffPayments from './StaffPayments.jsx';

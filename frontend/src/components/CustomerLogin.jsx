@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Brand from './Brand.jsx';
 import { Icon } from './UI.jsx';
 

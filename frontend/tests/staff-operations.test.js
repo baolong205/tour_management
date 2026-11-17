@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bookingActions, cancellationBody, scheduleLabels, validateDateRange } from '../src/staff-operations.js';
+import { bookingActions, cancellationBody, scheduleLabels, validateDateRange } from '../src/features/staff/operations.js';
 
 test('booking actions require both permission and actionable status', () => {
   const all = () => true;

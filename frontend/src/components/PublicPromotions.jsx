@@ -1,5 +1,4 @@
-import React from 'react';
-import { useApi } from '../hooks.js';
+import { useApi } from '../hooks/use-api.js';
 import { promotionCondition, promotionHeadline } from '../promotion-ui.js';
 import { Icon } from './UI.jsx';
 

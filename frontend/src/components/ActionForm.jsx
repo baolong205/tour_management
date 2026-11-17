@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { api } from '../services/api.js';
-import { buildFormBody } from '../forms.js';
+import { buildFormBody } from '../features/management/forms.js';
 
 export default function ActionForm({ path, method = 'POST', fields, initial = {}, label = 'Lưu thay đổi', onSuccess }) {
   const [busy, setBusy] = useState(false);

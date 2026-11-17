@@ -1,4 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
+import { BookingPricingService } from './services/booking-pricing.service.js';
+import { BookingReservationsService } from './services/booking-reservations.service.js';
 import { BookingService } from './booking.service.js';
 import { ScheduleStatus } from '../../common/enums/index.js';
 
@@ -55,10 +57,10 @@ describe('BookingService.quote – lý do chặn đặt tour', () => {
       {} as never, // passengerRepo
       {} as never, // cancelRepo
       {} as never, // invoiceRepo
-      scheduleRepo as never,
       scheduleService as never,
-      {} as never, // tourService
-      {} as never, // cancelPolicyService
+      new BookingPricingService(scheduleService as never, promotionService as never),
+      {} as never, // cancellations
+      new BookingReservationsService(scheduleRepo as never, scheduleService as never, promotionService as never),
       promotionService as never,
       {} as never, // events
       {} as never, // invoices

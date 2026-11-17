@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import Home from './pages/Home.jsx';
@@ -17,15 +17,15 @@ import Support from './pages/Support.jsx';
 import Payment from './pages/Payment.jsx';
 import Reviews from './pages/Reviews.jsx';
 import { useAuth } from './context/AuthContext.jsx';
-import { observePageMotion } from './motion.js';
-import { observeTilt } from './tilt.js';
+import { observePageMotion } from './lib/motion.js';
+import { observeTilt } from './lib/tilt.js';
 import WorkspaceLayout from './components/WorkspaceLayout.jsx';
-import { canEnterWorkspace } from './management.js';
-import { isWorkspacePath, routeForUser } from './routing.js';
+import { canEnterWorkspace } from './features/management/catalog.js';
+import { isWorkspacePath, routeForUser } from './routing/index.js';
 import AccountLayout from './components/AccountLayout.jsx';
 import AccountOverview from './pages/AccountOverview.jsx';
 import BookingDetail from './pages/BookingDetail.jsx';
-import { isAccountPath } from './booking-view.js';
+import { isAccountPath } from './features/booking/view.js';
 import StaffLayout from './components/StaffLayout.jsx';
 import StaffWorkspace from './pages/StaffWorkspace.jsx';
 

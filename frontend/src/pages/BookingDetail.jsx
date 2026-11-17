@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { api, assetUrl } from '../services/api.js';
-import { date, money, statusLabels } from '../utils.js';
-import { bookingProgress, canRequestCancellation, passengerGroups, passengerLabels, paymentMethodLabels } from '../booking-view.js';
+import { date, money, statusLabels } from '../lib/utils.js';
+import { bookingProgress, canRequestCancellation, passengerGroups, passengerLabels, paymentMethodLabels } from '../features/booking/view.js';
 import { Icon, State } from '../components/UI.jsx';
-import InvoiceButton from '../components/InvoiceButton.jsx';
-import PaymentReceiptStatus from '../components/PaymentReceiptStatus.jsx';
+import InvoiceButton from '../features/payment/components/InvoiceButton.jsx';
+import PaymentReceiptStatus from '../features/payment/components/PaymentReceiptStatus.jsx';
 
 const tabs = [['overview', 'Tổng quan'], ['passengers', 'Thông tin hành khách'], ['itinerary', 'Lịch trình'], ['payments', 'Thanh toán'], ['policy', 'Chính sách'], ['support', 'Hỗ trợ']];
 const dateTime = value => value ? new Date(value).toLocaleString('vi-VN') : 'Chưa có thông tin';

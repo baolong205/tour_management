@@ -33,7 +33,8 @@
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "test:checkout": "vitest run --config ./vitest.config.checkout.ts",
-    "test:search": "vitest run --config ./vitest.config.search.ts"
+    "test:search": "vitest run --config ./vitest.config.search.ts",
+    "test:migrations": "vitest run --config ./vitest.config.migrations.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

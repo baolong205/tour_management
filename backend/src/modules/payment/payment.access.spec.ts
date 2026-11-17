@@ -8,7 +8,7 @@ describe('Cash collection access', () => {
     const bookingService = { getOrFail: vi.fn().mockResolvedValue({ id: 'booking', customerId: 'customer' }) };
     const service = new PaymentService(
       {} as any, {} as any, {} as any, bookingService as any,
-      {} as any, {} as any, {} as any, {} as any,
+      {} as any, {} as any, {} as any,
     );
     const actor = { id: 'customer', permissions: ['booking:create'] } as AuthenticatedUser;
     await expect(service.create({ bookingId: 'booking', method: PaymentMethod.OFFICE }, actor)).rejects.toBeInstanceOf(ForbiddenException);

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useApi } from '../hooks.js';
-import { queryString, money } from '../utils.js';
+import { useEffect, useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
+import { queryString, money } from '../lib/utils.js';
 import { Icon, Pagination, State } from '../components/UI.jsx';
 import TourCard from '../components/TourCard.jsx';
-import { cleanTourFilter } from '../tour-search.js';
+import { cleanTourFilter } from '../features/tours/search.js';
 
 const filterNames = { search: 'Từ khóa', departureCity: 'Khởi hành', destination: 'Điểm đến', minPrice: 'Giá từ', maxPrice: 'Giá đến', minDays: 'Từ ngày', maxDays: 'Đến ngày' };
 const places = ['Hạ Long', 'Ninh Bình', 'Hội An', 'Phú Quốc', 'Sa Pa', 'Đà Lạt'];

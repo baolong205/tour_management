@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildFormBody, localDateTimeInput } from '../src/forms.js';
+import { buildFormBody, localDateTimeInput } from '../src/features/management/forms.js';
 
 test('promotion dates preserve their instant after editing local datetime inputs', () => {
   const instant = '2026-11-08T08:30:00.000Z';

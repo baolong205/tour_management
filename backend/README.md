@@ -52,12 +52,17 @@ Backend NestJS cho **Hệ thống quản lý tour du lịch**.
 
 ```bash
 # tạo database MySQL trống, cấu hình .env, rồi:
-$ npm run db:sync
+$ npm run db:migrate
 $ npm run db:seed
 ```
 
 Script seed idempotent (chạy nhiều lần vẫn đúng): upsert 22 permission, 4 role, gán permission theo
 `ROLE_PERMISSIONS`, và tạo tài khoản admin nếu chưa tồn tại.
+
+Migration hiện dùng chung danh sách trong `src/database/migrations/index.ts`, hỗ trợ
+database mới và schema đầy đủ từ cách cài đặt cũ. Xem [DATABASE.md](../docs/DATABASE.md)
+và [cấu trúc dự án](../docs/ARCHITECTURE.md). Chạy `npm run test:migrations` để kiểm
+tra cài mới, nâng cấp và bảo toàn dữ liệu trên database kiểm thử riêng.
 
 Tài khoản admin mặc định (đổi bằng biến môi trường `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_FULL_NAME`):
 

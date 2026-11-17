@@ -52,13 +52,13 @@ try {
       await run('', ['test']);
       for (const directory of ['backend', 'frontend']) {
         await run(directory, ['run', 'build']);
-        if (directory === 'backend') await run(directory, ['run', 'lint']);
+        await run(directory, ['run', 'lint']);
         await run(directory, ['test']);
       }
       for (const script of ['typecheck', 'lint', 'test']) await run('mobile', ['run', script]);
       break;
     case 'integration':
-      for (const script of ['test:e2e', 'test:checkout', 'test:search']) await run('backend', ['run', script]);
+      for (const script of ['test:migrations', 'test:e2e', 'test:checkout', 'test:search']) await run('backend', ['run', script]);
       break;
     default: throw new Error('Lệnh không hợp lệ: setup | build | check | integration.');
   }

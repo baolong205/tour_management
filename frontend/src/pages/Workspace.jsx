@@ -1,6 +1,5 @@
-import React from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { management } from '../management.js';
+import { management } from '../features/management/catalog.js';
 import AdminDashboard from './AdminDashboard.jsx';
 import AdminOverview from './AdminOverview.jsx';
 import Management from './Management.jsx';
@@ -12,7 +11,7 @@ import Reports from './Reports.jsx';
 import Support from './Support.jsx';
 import ActionForm from '../components/ActionForm.jsx';
 import Refunds from './Refunds.jsx';
-import { activeWorkspaceSection, permittedSections } from '../workspace-navigation.js';
+import { activeWorkspaceSection, permittedSections } from '../features/workspace/navigation.js';
 
 export default function Workspace({ params }) {
   const { user } = useAuth();

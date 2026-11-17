@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useId, useRef, useState } from 'react';
+import { useLayoutEffect, useId, useRef, useState } from 'react';
 import { Icon } from './UI.jsx';
 
 export default function ActionDialog({ title, children, label = title, className = '', disabled = false }) {

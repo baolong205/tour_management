@@ -1,4 +1,3 @@
-import React from 'react';
 import { Icon } from './UI.jsx';
 import Brand from './Brand.jsx';
 

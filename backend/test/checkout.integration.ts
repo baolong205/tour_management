@@ -8,12 +8,13 @@ import request from 'supertest';
 import { randomUUID } from 'node:crypto';
 import { AppModule } from '../src/app.module.js';
 import { ALL_ENTITIES } from '../src/common/entities/entity-list.js';
-import { PaymentReceipts1794099600000 } from '../src/database/migrations/1794099600000-PaymentReceipts.js';
+import { ALL_MIGRATIONS } from '../src/database/migrations/index.js';
 import { BookingStatus, PaymentMethod, RoleName, ScheduleStatus, TourStatus, UserStatus } from '../src/common/enums/index.js';
 import { User } from '../src/modules/users/entities/user.entity.js';
 import { Role } from '../src/modules/users/entities/role.entity.js';
 import { Permission } from '../src/modules/users/entities/permission.entity.js';
 import { CancelPolicy } from '../src/modules/catalog/entities/cancel-policy.entity.js';
+import { CancelPolicyRule } from '../src/modules/catalog/entities/cancel-policy-rule.entity.js';
 import { Tour } from '../src/modules/catalog/entities/tour.entity.js';
 import { DepartureSchedule } from '../src/modules/schedule/entities/departure-schedule.entity.js';
 import { Promotion } from '../src/modules/promotion/entities/promotion.entity.js';
@@ -51,16 +52,16 @@ describe('Checkout integration (MySQL)', () => {
     await admin.initialize();
     if (!/^tour_checkout_test_[a-f0-9]{12}$/.test(database) || database === process.env.DB_DATABASE) throw new Error('Unsafe test database');
     await admin.query(`CREATE DATABASE \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
-    source = new DataSource({ ...connection, database, entities: ALL_ENTITIES, synchronize: true, migrations: [PaymentReceipts1794099600000] });
+    source = new DataSource({ ...connection, database, entities: ALL_ENTITIES, synchronize: true, migrations: ALL_MIGRATIONS });
     await source.initialize();
     // Verify the additive upgrade from the previous schema, on this scratch database only.
     await source.query('DROP TABLE mail_messages');
     await source.query('CREATE INDEX idx_test_promotion ON bookings (promotion_id)');
     await source.query('DROP INDEX idx_bookings_promotion_customer ON bookings');
-    expect(await source.runMigrations({ transaction: 'each' })).toHaveLength(1);
+    expect(await source.runMigrations({ transaction: 'each' })).toHaveLength(ALL_MIGRATIONS.length);
     expect(await source.runMigrations({ transaction: 'each' })).toHaveLength(0);
 
-    const permissions = await source.getRepository(Permission).save(['booking:create', 'booking:read', 'booking:confirm', 'booking:cancel', 'promotion:manage', 'payment:read'].map(code => source.getRepository(Permission).create({ code })));
+    const permissions = await source.getRepository(Permission).save(['booking:create', 'booking:read', 'booking:confirm', 'booking:cancel', 'promotion:manage', 'payment:read', 'payment:refund'].map(code => source.getRepository(Permission).create({ code })));
     const customerRole = await source.getRepository(Role).save({ id: randomUUID(), name: RoleName.CUSTOMER, permissions: permissions.filter(permission => permission.code === 'booking:create') });
     const staffRole = await source.getRepository(Role).save({ id: randomUUID(), name: RoleName.ADMIN, permissions });
     const users = source.getRepository(User);
@@ -178,6 +179,8 @@ describe('Checkout integration (MySQL)', () => {
   });
 
   it('atomically creates the paid invoice and one email, protects privacy, and retries delivery', async () => {
+    // Booking-created mail is queued separately from the payment receipt.
+    await app.get(MailOutboxService).processPending();
     const payment = await createPayment(paidBookingId);
     expect((await gateway(payment.gatewayTxnRef)).body.result).toBe('PROCESSED');
     const detail = await request(app.getHttpServer()).get(`/api/bookings/${paidBookingId}`).auth(token, { type: 'bearer' }).expect(200);
@@ -185,7 +188,7 @@ describe('Checkout integration (MySQL)', () => {
     expect(detail.body.invoice.snapshot).toMatchObject({ discount: 100_000, total: 900_000, payment: { method: 'VNPAY' } });
     expect(await source.getRepository(Invoice).countBy({ bookingId: paidBookingId })).toBe(1);
     await gateway(payment.gatewayTxnRef);
-    expect(await source.getRepository(MailMessage).count()).toBe(1);
+    expect(await source.getRepository(MailMessage).countBy({ deduplicationKey: `payment-receipt:${payment.id}` })).toBe(1);
     await request(app.getHttpServer()).get(`/api/bookings/${paidBookingId}/invoice/document`).expect(401);
     await request(app.getHttpServer()).get(`/api/bookings/${paidBookingId}/invoice/document`).auth(otherToken, { type: 'bearer' }).expect(403);
     const document = await request(app.getHttpServer()).get(`/api/bookings/${paidBookingId}/invoice/document`).auth(token, { type: 'bearer' }).expect(200);
@@ -294,6 +297,58 @@ describe('Checkout integration (MySQL)', () => {
     await request(app.getHttpServer()).delete(`/api/promotions/${code.id}`).auth(staffToken, { type: 'bearer' }).expect(409);
     await request(app.getHttpServer()).patch(`/api/bookings/${booking.id}/cancel`).auth(staffToken, { type: 'bearer' }).send({ reason: 'Integration cancellation' }).expect(200);
     await request(app.getHttpServer()).delete(`/api/promotions/${code.id}`).auth(staffToken, { type: 'bearer' }).expect(409);
+  });
+
+  it('preserves cancellation snapshots and releases confirmed seats and promotion quota after approval', async () => {
+    await promotion('CANCELFLOW');
+    const booking = (await book('CANCELFLOW').expect(201)).body;
+    const payment = await createPayment(booking.id);
+    await gateway(payment.gatewayTxnRef);
+    const seatsBefore = (await source.getRepository(DepartureSchedule).findOneByOrFail({ id: schedules[0].id })).soldSeats;
+    await request(app.getHttpServer()).patch(`/api/bookings/${booking.id}/confirm`).auth(staffToken, { type: 'bearer' }).send({}).expect(200);
+    const url = `/api/bookings/${booking.id}/cancel-request`;
+    await request(app.getHttpServer()).post(url).auth(otherToken, { type: 'bearer' }).send({ reason: 'Other customer cannot cancel' }).expect(403);
+    const first = (await request(app.getHttpServer()).post(url).auth(token, { type: 'bearer' }).send({ reason: 'Change travel plans' }).expect(201)).body;
+    expect(first.status).toBe('CANCEL_REQUESTED');
+    await request(app.getHttpServer()).post(url).auth(token, { type: 'bearer' }).send({ reason: 'Duplicate request' }).expect(409);
+    await request(app.getHttpServer()).patch(`${url}/process`).auth(token, { type: 'bearer' }).send({ approve: true }).expect(403);
+    const rejected = (await request(app.getHttpServer()).patch(`${url}/process`).auth(staffToken, { type: 'bearer' }).send({ approve: false, rejectReason: 'Keep the original trip' }).expect(200)).body;
+    expect(rejected.status).toBe('CONFIRMED');
+    const pending = (await request(app.getHttpServer()).post(url).auth(token, { type: 'bearer' }).send({ reason: 'Confirm cancellation request' }).expect(201)).body;
+    const snapshot = pending.cancelRequests.find((item: { status: string }) => item.status === 'PENDING');
+    expect(snapshot).toMatchObject({ feeAmount: 0, refundAmount: booking.total });
+    const policy = await source.getRepository(CancelPolicy).findOneByOrFail({ id: (await source.getRepository(Tour).findOneByOrFail({ id: booking.tourId })).cancelPolicyId });
+    await source.getRepository(CancelPolicy).update(policy.id, { name: 'Policy edited after request' });
+    const addedRule = await source.getRepository(CancelPolicyRule).save(source.getRepository(CancelPolicyRule).create({ policyId: policy.id, daysBefore: 0, feePercent: 60 }));
+    const approved = (await request(app.getHttpServer()).patch(`${url}/process`).auth(staffToken, { type: 'bearer' }).send({ approve: true }).expect(200)).body;
+    expect(approved.status).toBe('CANCELLED');
+    expect(approved.cancelRequests.find((item: { id: string }) => item.id === snapshot.id)).toMatchObject({ status: 'APPROVED', feeAmount: snapshot.feeAmount, refundAmount: snapshot.refundAmount });
+    expect((await source.getRepository(DepartureSchedule).findOneByOrFail({ id: schedules[0].id })).soldSeats).toBe(seatsBefore);
+    expect((await source.getRepository(Promotion).findOneByOrFail({ code: 'CANCELFLOW' })).usedCount).toBe(0);
+    await source.getRepository(CancelPolicyRule).delete(addedRule.id);
+    await source.getRepository(CancelPolicy).update(policy.id, { name: policy.name });
+  });
+
+  it('handles partial, rejected and full refunds with ownership permissions and idempotent completion', async () => {
+    const booking = (await book().expect(201)).body;
+    const payment = await createPayment(booking.id, PaymentMethod.MOMO);
+    await gateway(payment.gatewayTxnRef);
+    const body = { paymentId: payment.id, amount: 400_000, reason: 'CANCEL' };
+    await request(app.getHttpServer()).post('/api/payments/refunds').auth(token, { type: 'bearer' }).send(body).expect(403);
+    const first = (await request(app.getHttpServer()).post('/api/payments/refunds').auth(staffToken, { type: 'bearer' }).send(body).expect(201)).body;
+    await request(app.getHttpServer()).patch(`/api/payments/refunds/${first.id}/complete`).auth(token, { type: 'bearer' }).send({}).expect(403);
+    for (let count = 0; count < 2; count++) await request(app.getHttpServer()).patch(`/api/payments/refunds/${first.id}/complete`).auth(staffToken, { type: 'bearer' }).send({ gatewayRef: 'PARTIAL-REFUND' }).expect(200);
+    expect(await source.getRepository(Payment).findOneByOrFail({ id: payment.id })).toMatchObject({ status: 'PARTIALLY_REFUNDED', refundedAmount: 400_000 });
+    const failed = (await request(app.getHttpServer()).post('/api/payments/refunds').auth(staffToken, { type: 'bearer' }).send({ ...body, amount: 100_000 }).expect(201)).body;
+    await request(app.getHttpServer()).patch(`/api/payments/refunds/${failed.id}/reject`).auth(staffToken, { type: 'bearer' }).send({ errorMessage: 'Bank rejected transfer' }).expect(200);
+    await request(app.getHttpServer()).patch(`/api/payments/refunds/${failed.id}/complete`).auth(staffToken, { type: 'bearer' }).send({}).expect(409);
+    await request(app.getHttpServer()).post('/api/payments/refunds').auth(staffToken, { type: 'bearer' }).send({ ...body, amount: payment.amount - 400_000 + 1 }).expect(400);
+    const last = (await request(app.getHttpServer()).post('/api/payments/refunds').auth(staffToken, { type: 'bearer' }).send({ paymentId: payment.id, reason: 'CANCEL' }).expect(201)).body;
+    await request(app.getHttpServer()).patch(`/api/payments/refunds/${last.id}/complete`).auth(staffToken, { type: 'bearer' }).send({}).expect(200);
+    expect(await source.getRepository(Payment).findOneByOrFail({ id: payment.id })).toMatchObject({ status: 'REFUNDED', refundedAmount: payment.amount });
+    const list = (await request(app.getHttpServer()).get(`/api/payments/refunds/list?paymentId=${payment.id}`).auth(staffToken, { type: 'bearer' }).expect(200)).body;
+    expect(list.total).toBe(3);
+    expect(await source.getRepository(Invoice).countBy({ bookingId: booking.id })).toBe(1);
   });
 
   it('supports the mobile signup, rotating session, booking, payment and invoice API contract', async () => {

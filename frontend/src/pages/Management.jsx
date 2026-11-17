@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../services/api.js';
-import { columnLabels } from '../management.js';
+import { columnLabels } from '../features/management/catalog.js';
 import ActionForm from '../components/ActionForm.jsx';
 import PromotionAdmin from '../components/PromotionAdmin.jsx';
 import { Pagination, State } from '../components/UI.jsx';
-import { localDateTimeInput } from '../forms.js';
+import { localDateTimeInput } from '../features/management/forms.js';
 
 export default function Management({ config }) {
   const { can } = useAuth();

@@ -30,13 +30,14 @@ export const palette = {
  * Chỉ dùng font hệ thống phổ biến của mobile, không nạp font ngoài:
  * - Android: Roboto (`sans-serif`, `sans-serif-medium`) — phủ đủ glyph tiếng Việt.
  * - iOS: SF (`System`) cho nội dung, Georgia cho tiêu đề.
- * - Web: Georgia / system-ui.
+ * - Web: Times New Roman / system-ui. Georgia trên Windows thiếu một số glyph
+ *   tiếng Việt, khiến trình duyệt trộn font trong cùng từ và tách rời dấu.
  *
  * Tuyệt đối không dùng họ `serif` của Android: Noto Serif trên nhiều máy thiếu
  * glyph tiếng Việt dựng sẵn nên dấu bị tách rời (miền → miè` n, bắt đầu → bă´ t đà`u).
  */
 export const fonts = {
-  serif: Platform.select({ ios: 'Georgia', android: 'sans-serif-medium', default: 'Georgia, "Times New Roman", serif' }) as string,
+  serif: Platform.select({ ios: 'Georgia', android: 'sans-serif-medium', default: '"Times New Roman", serif' }) as string,
   sans: Platform.select({ ios: 'System', android: 'sans-serif', default: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }) as string,
   mono: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'ui-monospace, SFMono-Regular, Menlo, monospace' }) as string,
 };

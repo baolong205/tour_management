@@ -1,14 +1,15 @@
-# ViVu Travel — Frontend
+# TourGo — Frontend
 
 Giao diện tiếng Việt, React + Vite, CSS thuần. API được đối chiếu với NestJS trong dự án; không dùng dữ liệu tour giả.
 
 ## Chạy cục bộ
 
 ```powershell
-cd D:\nam4\project\tour_management\frontend
-npm install
-Copy-Item .env.example .env
-npm run dev
+# Từ thư mục gốc dự án:
+cd frontend
+npm.cmd ci
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+npm.cmd run dev
 ```
 
 Mở `http://localhost:5173`. Chạy backend và MySQL theo cấu hình backend trước khi sử dụng dữ liệu thật. Vite chuyển tiếp `/api` và `/uploads` sang `http://localhost:3000`.
@@ -24,17 +25,29 @@ Từ thư mục gốc, `npm.cmd run dev:web` tự chạy backend và website v�
 - Quản lý thông tin cơ bản của tour (tạo / sửa / xóa), hiển thị theo permission `tour:read`, `tour:write`, `tour:delete`. Backend vẫn là nơi thực thi phân quyền.
 - Tương thích payload trực tiếp và envelope `RESPONSE_ENVELOPE=true`.
 
-## Kiểm tra
+## Tổ chức mã nguồn
 
-## Hiệu ứng giao diện
+- `src/pages/`: các trang được router hiển thị.
+- `src/components/`: UI và layout dùng chung.
+- `src/features/`: helper và component theo nghiệp vụ tours, booking, payment,
+  schedules, staff, admin, management và workspace.
+- `src/styles/`: CSS, tải theo thứ tự trong `index.css`.
+- `src/routing/`, `src/hooks/`, `src/lib/`, `src/services/`: điều hướng, hook,
+  tiện ích dùng chung và API client.
+- `tests/`: kiểm thử logic; báo cáo/screenshot cục bộ đặt trong `.artifacts/`.
 
-## Bổ sung chức năng khách hàng / Admin / STAFF (28/10/2026)
+Xem thêm [quy ước toàn dự án](../docs/ARCHITECTURE.md).
 
-Đã thêm hồ sơ, khôi phục mật khẩu demo, thông báo, thanh toán/chứng từ, đánh giá, CSKH và workspace quản trị theo quyền. Xem đầy đủ trạng thái và giới hạn tại 
+## Chức năng tài khoản và vận hành
+
+Hồ sơ, khôi phục mật khẩu demo, thông báo, thanh toán/chứng từ, đánh giá, CSKH và
+workspace quản trị theo quyền. Xem [danh sách chức năng](../docs/FEATURE-CHECKLIST.md).
 
 Các trang mới: `#/account`, `#/forgot-password`, `#/notifications`, `#/support`, `#/reviews`, `#/payment/:bookingId`, `#/admin`.
 
-Lưu ý: chưa gửi email thật, chưa VietQR/cổng thanh toán thật, báo cáo CSV và in/lưu PDF qua trình duyệt; một số biểu mẫu quản trị nâng cao dùng JSON. Cần khởi động lại backend sau cập nhật và đăng nhập lại để nhận vai trò/quyền mới.
+Email thanh toán do backend gửi theo cấu hình SMTP và `MAIL_ENABLED`; VNPay/MoMo
+là cổng giả lập. Xem [thanh toán và hóa đơn](../docs/PAYMENT_RECEIPTS.md).
+Báo cáo CSV và in/lưu PDF qua trình duyệt; một số biểu mẫu quản trị nâng cao dùng JSON.
 
 ### Hiệu ứng 3D
 
@@ -44,15 +57,17 @@ Lưu ý: chưa gửi email thật, chưa VietQR/cổng thanh toán thật, báo 
 - Hiệu ứng vào trang, tiêu đề banner xuất hiện lần lượt, ảnh banner phóng nhẹ một lần.
 - Các thẻ tour và khối nội dung xuất hiện khi vào vùng nhìn; hỗ trợ cả dữ liệu API tải bất đồng bộ.
 - Hover/nhấn cho nút, ảnh, danh mục; hiệu ứng mở menu và hộp thoại.
-- Không thêm thư viện. CSS nằm ở `D:\nam4\project\tour_management\frontend\src\animations.css`; bộ quan sát nằm ở `D:\nam4\project\tour_management\frontend\src\motion.js`.
+- CSS hiệu ứng nằm ở `src/styles/animations.css`; bộ quan sát nằm ở
+  `src/lib/motion.js` và `src/lib/tilt.js`.
 - Tôn trọng `prefers-reduced-motion`, kể cả khi thay đổi lúc trang đang mở. Khi không có observer, nội dung vẫn hiển thị bình thường. Không remount trang khi chỉ thay đổi query bộ lọc.
 
 ### Lệnh kiểm tra
 
 ```powershell
-npm test
-npm run build
-npm run preview
+npm.cmd run lint
+npm.cmd test
+npm.cmd run build
+npm.cmd run preview
 ```
 
 ## Phạm vi và triển khai
@@ -60,7 +75,11 @@ npm run preview
 - Sử dụng hash routing, không cần thư viện router hoặc cấu hình fallback của máy chủ.
 - Token lưu trong `sessionStorage`, mất khi đóng tab. Khi đưa lên production nên xem xét cơ chế cookie HttpOnly phía backend để giảm rủi ro XSS.
 - Sáu tour DEMO có ảnh Pexels lưu cục bộ, nguồn ghi tại `public/images/sources.json` và trang `/images/credits.html`. Một số ảnh là ảnh minh họa trải nghiệm, không bảo đảm địa điểm chụp hoặc dịch vụ thực tế của tour. SVG vẫn dùng làm ảnh dự phòng.
-- Banner trang chủ, trang đăng nhập và khối giới thiệu dùng ảnh cục bộ trong `public/images`. Ảnh tour được sao chép sang thư mục uploads và gắn vào DB bằng `npm run db:seed:images` khi chạy ở `D:\nam4\project\tour_management\backend`. Chạy `db:seed:tours` trước nếu database chưa có tour DEMO. Script ảnh không tạo trùng và giữ ảnh bìa người dùng đã thêm; tên file có hash nội dung để tránh cache cũ.
-- Tạo đơn chưa đồng nghĩa thanh toán thành công. Frontend này chưa tích hợp giao diện cổng thanh toán, quản lý lịch khởi hành, báo cáo, nhà cung cấp hoặc toàn bộ module vận hành của backend.
+- Banner trang chủ, trang đăng nhập và khối giới thiệu dùng ảnh cục bộ trong `public/images`.
+  Chạy `npm run db:seed:images` trong `backend/` để sao chép ảnh tour vào uploads và
+  gắn vào DB. Chạy `db:seed:tours` trước nếu chưa có tour DEMO. Script giữ ảnh bìa
+  người dùng đã thêm; tên file có hash nội dung để tránh cache cũ.
+- Tạo đơn chưa đồng nghĩa thanh toán thành công. Ghi nhận tiền, xác nhận chuyến đi,
+  duyệt chứng từ và hoàn tiền là các trạng thái riêng do backend xử lý.
 - Khi deploy thư mục `dist`, cần reverse proxy `/api` và `/uploads` về backend, hoặc đặt `VITE_API_BASE_URL` thành URL API tuyệt đối lúc build và cấu hình CORS_ORIGIN tương ứng ở backend. Proxy Vite chỉ áp dụng cho dev.
 - Unit test kiểm tra xử lý giá, ngày, truy vấn, đường dẫn sau đăng nhập và trạng thái đơn. Cần backend + database để kiểm thử tích hợp giao dịch thật.

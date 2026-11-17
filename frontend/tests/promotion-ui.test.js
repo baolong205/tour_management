@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canRequestBestOffer, bestOfferCode, promotionAvailablePath, sortVouchers } from '../src/utils.js';
+import { canRequestBestOffer, bestOfferCode, promotionAvailablePath, sortVouchers } from '../src/lib/utils.js';
 import { parseCustomerIds, scopeSummary, scopeLabel, scopeTypes, promotionHeadline, promotionCondition } from '../src/promotion-ui.js';
-import { isAccountPath } from '../src/booking-view.js';
+import { isAccountPath } from '../src/features/booking/view.js';
 
 test('best-for-cart is only requested with a complete cart context', () => {
   assert.equal(canRequestBestOffer(3_500_000, 'schedule-1'), true);

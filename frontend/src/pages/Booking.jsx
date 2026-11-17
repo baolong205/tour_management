@@ -1,12 +1,12 @@
-import React, { useRef, useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useRef, useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api, assetUrl } from '../services/api.js';
-import { date, money } from '../utils.js';
+import { date, money } from '../lib/utils.js';
 import { Icon, State } from '../components/UI.jsx';
-import BookingSuccess from '../components/BookingSuccess.jsx';
-import PromotionPicker from '../components/PromotionPicker.jsx';
-import '../invoice.css';
+import BookingSuccess from '../features/booking/components/BookingSuccess.jsx';
+import PromotionPicker from '../features/booking/components/PromotionPicker.jsx';
+import '../styles/invoice.css';
 
 const ticketNames = { ADULT: 'Người lớn', CHILD: 'Trẻ em', INFANT: 'Em bé' };
 export default function Booking({ id, params }) {

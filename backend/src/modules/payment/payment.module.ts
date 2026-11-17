@@ -12,6 +12,8 @@ import { PaymentController } from './payment.controller.js';
 import { PaymentService } from './payment.service.js';
 import { MockPaymentGateway } from './services/mock-payment.gateway.js';
 import { PAYMENT_GATEWAY } from './services/payment-gateway.interface.js';
+import { PaymentReceiptService } from './services/payment-receipt.service.js';
+import { RefundService } from './services/refund.service.js';
 
 /**
  * Thanh toán + hoàn tiền (cổng giả lập).
@@ -34,6 +36,8 @@ import { PAYMENT_GATEWAY } from './services/payment-gateway.interface.js';
   controllers: [PaymentController],
   providers: [
     PaymentService,
+    PaymentReceiptService,
+    RefundService,
     MockPaymentGateway,
     { provide: PAYMENT_GATEWAY, useExisting: MockPaymentGateway },
   ],

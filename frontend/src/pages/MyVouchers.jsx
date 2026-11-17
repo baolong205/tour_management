@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { promotionCondition, promotionHeadline } from '../promotion-ui.js';
-import { sortVouchers } from '../utils.js';
+import { sortVouchers } from '../lib/utils.js';
 import { Icon, State } from '../components/UI.jsx';
 
 const expiry = new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric' });

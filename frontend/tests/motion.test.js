@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { observePageMotion } from '../src/motion.js';
+import { observePageMotion } from '../src/lib/motion.js';
 
 function fixture(reduced = false) {
   const listeners = new Map();

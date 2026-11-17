@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { pickupBody } from '../src/pickup.js';
+import { pickupBody } from '../src/features/schedules/pickup.js';
 
 test('pickup serializes only allowed fields and supports clearing', () => {
   assert.deepEqual(pickupBody('  Sân bay  ', [{ id: 'old', name: ' Cổng A ', dayNo: '2', meetTime: '08:30', sortOrder: 99 }]), { meetingPoint: 'Sân bay', checkpoints: [{ name: 'Cổng A', dayNo: 2, meetTime: '08:30', sortOrder: 0 }] });

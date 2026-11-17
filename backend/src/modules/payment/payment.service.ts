@@ -22,11 +22,13 @@ import {
 } from '../../common/enums/index.js';
 import { BookingService } from '../booking/booking.service.js';
 import { Booking } from '../booking/entities/booking.entity.js';
-import { InvoiceService } from '../booking/services/invoice.service.js';
-import { renderInvoice } from '../booking/templates/invoice.template.js';
-import { MailOutboxService } from '../mail/mail-outbox.service.js';
-import { CancelRequest } from '../booking/entities/cancel-request.entity.js';
-import { PromotionService } from '../promotion/promotion.service.js';
+import { PaymentReceiptService } from './services/payment-receipt.service.js';
+import { RefundService } from './services/refund.service.js';
+import {
+  isPaidStatus,
+  lockPayment,
+  toRefundView,
+} from './services/payment-state.js';
 import type {
   CompleteRefundDto,
   CreatePaymentDto,
@@ -49,10 +51,15 @@ import type {
 } from './types/payment.types.js';
 
 /** Phương thức thanh toán online – đi qua cổng, có `payment_url`. */
-const GATEWAY_METHODS: ReadonlySet<PaymentMethod> = new Set([PaymentMethod.VNPAY, PaymentMethod.MOMO]);
+const GATEWAY_METHODS: ReadonlySet<PaymentMethod> = new Set([
+  PaymentMethod.VNPAY,
+  PaymentMethod.MOMO,
+]);
 
 /** Phương thức "thu tại quầy": coi như thu tiền mặt ngay khi xác nhận. */
-const OFFICE_METHODS: ReadonlySet<PaymentMethod> = new Set([PaymentMethod.OFFICE]);
+const OFFICE_METHODS: ReadonlySet<PaymentMethod> = new Set([
+  PaymentMethod.OFFICE,
+]);
 
 /** TTL mặc định của một phiên thanh toán online. */
 const PAYMENT_TTL_MINUTES = 15;
@@ -74,16 +81,17 @@ export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);
 
   constructor(
-    @InjectRepository(Payment) private readonly paymentRepo: Repository<Payment>,
+    @InjectRepository(Payment)
+    private readonly paymentRepo: Repository<Payment>,
     @InjectRepository(Refund) private readonly refundRepo: Repository<Refund>,
-    @InjectRepository(PaymentEvent) private readonly eventRepo: Repository<PaymentEvent>,
+    @InjectRepository(PaymentEvent)
+    private readonly eventRepo: Repository<PaymentEvent>,
     private readonly bookingService: BookingService,
     // Cổng thanh toán lấy qua token: đổi mock → thật chỉ cần sửa provider ở PaymentModule.
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
-    private readonly invoices: InvoiceService,
-    private readonly mail: MailOutboxService,
-    private readonly promotions: PromotionService,
-  ) { }
+    private readonly receipts: PaymentReceiptService,
+    private readonly refunds: RefundService,
+  ) {}
 
   // ===== truy vấn =====
 
@@ -95,9 +103,14 @@ export class PaymentService {
       .createQueryBuilder('payment')
       .innerJoinAndSelect('payment.booking', 'booking');
 
-    if (query.status) qb.andWhere('payment.status = :status', { status: query.status });
-    if (query.method) qb.andWhere('payment.method = :method', { method: query.method });
-    if (query.bookingId) qb.andWhere('payment.bookingId = :bookingId', { bookingId: query.bookingId });
+    if (query.status)
+      qb.andWhere('payment.status = :status', { status: query.status });
+    if (query.method)
+      qb.andWhere('payment.method = :method', { method: query.method });
+    if (query.bookingId)
+      qb.andWhere('payment.bookingId = :bookingId', {
+        bookingId: query.bookingId,
+      });
 
     if (query.search) {
       const kw = `%${query.search.trim()}%`;
@@ -112,7 +125,12 @@ export class PaymentService {
       .take(limit);
 
     const [payments, total] = await qb.getManyAndCount();
-    return { items: payments.map((payment) => this.toView(payment)), total, page, limit };
+    return {
+      items: payments.map((payment) => this.toView(payment)),
+      total,
+      page,
+      limit,
+    };
   }
 
   async listMine(query: QueryPaymentsDto, actor: AuthenticatedUser) {
@@ -124,15 +142,24 @@ export class PaymentService {
       .innerJoinAndSelect('payment.booking', 'booking')
       .where('booking.customerId = :customerId', { customerId: actor.id });
 
-    if (query.status) qb.andWhere('payment.status = :status', { status: query.status });
-    if (query.bookingId) qb.andWhere('payment.bookingId = :bookingId', { bookingId: query.bookingId });
+    if (query.status)
+      qb.andWhere('payment.status = :status', { status: query.status });
+    if (query.bookingId)
+      qb.andWhere('payment.bookingId = :bookingId', {
+        bookingId: query.bookingId,
+      });
 
     qb.orderBy('payment.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 
     const [payments, total] = await qb.getManyAndCount();
-    return { items: payments.map((payment) => this.toView(payment)), total, page, limit };
+    return {
+      items: payments.map((payment) => this.toView(payment)),
+      total,
+      page,
+      limit,
+    };
   }
 
   async getById(id: string, actor?: AuthenticatedUser): Promise<PaymentView> {
@@ -148,17 +175,26 @@ export class PaymentService {
   }
 
   async getOrFail(id: string): Promise<Payment> {
-    const payment = await this.paymentRepo.findOne({ where: { id }, relations: { booking: true } });
-    if (!payment) throw new NotFoundException('Không tìm thấy giao dịch thanh toán');
+    const payment = await this.paymentRepo.findOne({
+      where: { id },
+      relations: { booking: true },
+    });
+    if (!payment)
+      throw new NotFoundException('Không tìm thấy giao dịch thanh toán');
     return payment;
   }
 
   /** Tổng hợp thanh toán + hoàn tiền của một booking (trang chi tiết đơn). */
-  async getByBooking(bookingId: string, actor: AuthenticatedUser): Promise<BookingPaymentsView> {
+  async getByBooking(
+    bookingId: string,
+    actor: AuthenticatedUser,
+  ): Promise<BookingPaymentsView> {
     const booking = await this.bookingService.getOrFail(bookingId);
     const canReadAll = actor.permissions.includes('payment:read');
     if (!canReadAll && booking.customerId !== actor.id) {
-      throw new ForbiddenException('Bạn không có quyền xem thanh toán của booking này');
+      throw new ForbiddenException(
+        'Bạn không có quyền xem thanh toán của booking này',
+      );
     }
 
     const payments = await this.paymentRepo.find({
@@ -168,17 +204,20 @@ export class PaymentService {
     const paymentIds = payments.map((p) => p.id);
     const refunds = paymentIds.length
       ? await this.refundRepo
-        .createQueryBuilder('refund')
-        .where('refund.paymentId IN (:...paymentIds)', { paymentIds })
-        .orderBy('refund.createdAt', 'DESC')
-        .getMany()
+          .createQueryBuilder('refund')
+          .where('refund.paymentId IN (:...paymentIds)', { paymentIds })
+          .orderBy('refund.createdAt', 'DESC')
+          .getMany()
       : [];
 
     const bookingWithCode = booking as Booking & { code: string };
     const paidTotal = payments
-      .filter((p) => this.isPaidStatus(p.status))
+      .filter((p) => isPaidStatus(p.status))
       .reduce((sum, p) => sum + (p.amount - p.refundedAmount), 0);
-    const refundedTotal = payments.reduce((sum, p) => sum + p.refundedAmount, 0);
+    const refundedTotal = payments.reduce(
+      (sum, p) => sum + p.refundedAmount,
+      0,
+    );
 
     return {
       bookingId,
@@ -188,9 +227,13 @@ export class PaymentService {
       paidTotal,
       refundedTotal,
       outstanding: Math.max(booking.total - paidTotal, 0),
-      receiptEmail: await this.mail.receiptStatus(payments.filter(payment => this.isPaidStatus(payment.status)).map(payment => payment.id)),
+      receiptEmail: await this.receipts.status(
+        payments
+          .filter((payment) => isPaidStatus(payment.status))
+          .map((payment) => payment.id),
+      ),
       payments: payments.map((payment) => this.toView(payment)),
-      refunds: refunds.map((refund) => this.toRefundView(refund)),
+      refunds: refunds.map((refund) => toRefundView(refund)),
     };
   }
 
@@ -204,12 +247,20 @@ export class PaymentService {
    * - `VNPAY/MOMO`: sinh `txn_ref` + URL giả lập, chờ webhook xác nhận.
    * - `BANK_TRANSFER`: chờ khách gửi chứng từ (`submitProof`), nhân viên duyệt tay.
    */
-  async create(dto: CreatePaymentDto, actor: AuthenticatedUser): Promise<PaymentView> {
+  async create(
+    dto: CreatePaymentDto,
+    actor: AuthenticatedUser,
+  ): Promise<PaymentView> {
     const booking = await this.bookingService.getOrFail(dto.bookingId);
     const canOperate = actor.permissions.includes('payment:read');
-    if (dto.method === PaymentMethod.OFFICE && !canOperate) throw new ForbiddenException('Chỉ nhân viên được xác nhận thu tiền tại quầy');
+    if (dto.method === PaymentMethod.OFFICE && !canOperate)
+      throw new ForbiddenException(
+        'Chỉ nhân viên được xác nhận thu tiền tại quầy',
+      );
     if (!canOperate && booking.customerId !== actor.id) {
-      throw new ForbiddenException('Bạn không có quyền thanh toán cho booking này');
+      throw new ForbiddenException(
+        'Bạn không có quyền thanh toán cho booking này',
+      );
     }
     this.assertBookableForPayment(booking);
 
@@ -217,7 +268,9 @@ export class PaymentService {
       const locked = await this.lockBooking(manager, booking.id);
       this.assertBookableForPayment(locked);
       if ((dto.method === PaymentMethod.NO_CHARGE) !== (locked.total === 0)) {
-        throw new BadRequestException('Phương thức không thu tiền chỉ dùng cho đơn có tổng thanh toán bằng 0');
+        throw new BadRequestException(
+          'Phương thức không thu tiền chỉ dùng cho đơn có tổng thanh toán bằng 0',
+        );
       }
 
       const existingSuccess = await manager.getRepository(Payment).findOne({
@@ -226,11 +279,16 @@ export class PaymentService {
           status: PaymentStatus.SUCCESS,
         },
       });
-      if (existingSuccess) throw new ConflictException('Booking đã được thanh toán');
+      if (existingSuccess)
+        throw new ConflictException('Booking đã được thanh toán');
 
       // Đang có giao dịch chờ cùng phương thức ⇒ trả lại phiên cũ để khách không tạo trùng.
       const pendingSameMethod = await manager.getRepository(Payment).findOne({
-        where: { bookingId: locked.id, method: dto.method, status: PaymentStatus.PENDING },
+        where: {
+          bookingId: locked.id,
+          method: dto.method,
+          status: PaymentStatus.PENDING,
+        },
         order: { createdAt: 'DESC' },
       });
       if (pendingSameMethod) return pendingSameMethod.id;
@@ -263,9 +321,11 @@ export class PaymentService {
         saved.paidAt = new Date();
         saved.expiresAt = null;
         await manager.save(Payment, saved);
-        await this.onPaymentSucceeded(manager, locked, saved);
+        await this.receipts.record(manager, locked, saved);
       }
-      this.logger.log(`Tạo payment ${saved.gatewayTxnRef ?? saved.id} (${dto.method}) cho booking ${locked.code}`);
+      this.logger.log(
+        `Tạo payment ${saved.gatewayTxnRef ?? saved.id} (${dto.method}) cho booking ${locked.code}`,
+      );
       return saved.id;
     });
 
@@ -278,17 +338,33 @@ export class PaymentService {
   }
 
   /** Khách gửi ảnh chụp chuyển khoản – chờ nhân viên duyệt. */
-  async submitProof(paymentId: string, dto: SubmitProofDto, actor: AuthenticatedUser): Promise<PaymentView> {
+  async submitProof(
+    paymentId: string,
+    dto: SubmitProofDto,
+    actor: AuthenticatedUser,
+  ): Promise<PaymentView> {
     const payment = await this.getOrFail(paymentId);
     const booking = await this.bookingService.getOrFail(payment.bookingId);
-    if (booking.customerId !== actor.id && !actor.permissions.includes('payment:read')) {
-      throw new ForbiddenException('Bạn không có quyền gửi chứng từ cho giao dịch này');
+    if (
+      booking.customerId !== actor.id &&
+      !actor.permissions.includes('payment:read')
+    ) {
+      throw new ForbiddenException(
+        'Bạn không có quyền gửi chứng từ cho giao dịch này',
+      );
     }
     if (payment.method !== PaymentMethod.BANK_TRANSFER) {
-      throw new BadRequestException('Chỉ giao dịch chuyển khoản mới cần gửi chứng từ');
+      throw new BadRequestException(
+        'Chỉ giao dịch chuyển khoản mới cần gửi chứng từ',
+      );
     }
-    if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.PROOF_SUBMITTED) {
-      throw new ConflictException(`Giao dịch đang ở trạng thái ${payment.status}, không thể gửi chứng từ`);
+    if (
+      payment.status !== PaymentStatus.PENDING &&
+      payment.status !== PaymentStatus.PROOF_SUBMITTED
+    ) {
+      throw new ConflictException(
+        `Giao dịch đang ở trạng thái ${payment.status}, không thể gửi chứng từ`,
+      );
     }
 
     payment.proofUrl = dto.proofUrl.trim();
@@ -298,19 +374,34 @@ export class PaymentService {
   }
 
   /** Nhân viên duyệt chứng từ chuyển khoản → payment SUCCESS + booking CONFIRMED. */
-  async approveProof(paymentId: string, actor: AuthenticatedUser): Promise<PaymentView> {
-    return this.confirmManualPayment(paymentId, actor, 'Duyệt chứng từ chuyển khoản');
+  async approveProof(
+    paymentId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PaymentView> {
+    return this.confirmManualPayment(
+      paymentId,
+      actor,
+      'Duyệt chứng từ chuyển khoản',
+    );
   }
 
   /** Nhân viên từ chối chứng từ → payment FAILED, khách phải gửi lại. */
-  async rejectProof(paymentId: string, reason: string, actor: AuthenticatedUser): Promise<PaymentView> {
+  async rejectProof(
+    paymentId: string,
+    reason: string,
+    actor: AuthenticatedUser,
+  ): Promise<PaymentView> {
     return this.paymentRepo.manager.transaction(async (manager) => {
-      const payment = await this.lockPayment(manager, paymentId);
+      const payment = await lockPayment(manager, paymentId);
       if (payment.status !== PaymentStatus.PROOF_SUBMITTED) {
-        throw new ConflictException('Chỉ từ chối được giao dịch đang chờ duyệt chứng từ');
+        throw new ConflictException(
+          'Chỉ từ chối được giao dịch đang chờ duyệt chứng từ',
+        );
       }
       payment.status = PaymentStatus.FAILED;
-      payment.proofNote = [payment.proofNote, `Từ chối: ${reason.trim()}`].filter(Boolean).join('\n');
+      payment.proofNote = [payment.proofNote, `Từ chối: ${reason.trim()}`]
+        .filter(Boolean)
+        .join('\n');
       payment.reviewedBy = actor.id;
       await manager.save(Payment, payment);
       return this.toView(payment);
@@ -324,9 +415,15 @@ export class PaymentService {
    * cùng một luồng xử lý với webhook thật. Nhờ vậy dev test được end-to-end mà
    * không phải tự tay tính HMAC.
    */
-  async simulateGatewayPayment(txnRef: string, outcome: 'success' | 'failed' = 'success'): Promise<WebhookOutcome> {
-    const payment = await this.paymentRepo.findOne({ where: { gatewayTxnRef: txnRef } });
-    if (!payment) throw new NotFoundException('Không tìm thấy giao dịch trên cổng giả lập');
+  async simulateGatewayPayment(
+    txnRef: string,
+    outcome: 'success' | 'failed' = 'success',
+  ): Promise<WebhookOutcome> {
+    const payment = await this.paymentRepo.findOne({
+      where: { gatewayTxnRef: txnRef },
+    });
+    if (!payment)
+      throw new NotFoundException('Không tìm thấy giao dịch trên cổng giả lập');
 
     const success = outcome === 'success';
     const gatewayTxnNo = `MOCK${Date.now()}`;
@@ -353,7 +450,12 @@ export class PaymentService {
   }
 
   /** Gợi ý chữ ký cho công cụ test (Postman/Swagger) khi muốn tự bắn webhook. */
-  buildSignaturePreview(input: { txnRef: string; gatewayTxnNo: string; amount: number; success: boolean }) {
+  buildSignaturePreview(input: {
+    txnRef: string;
+    gatewayTxnNo: string;
+    amount: number;
+    success: boolean;
+  }) {
     return {
       signature: this.gateway.buildSignature(input),
       header: 'x-mock-signature',
@@ -374,21 +476,25 @@ export class PaymentService {
     const eventType = dto.eventType ?? WebhookEventType.IPN;
     // Serialize DTO một lần: `payment_events.raw_payload` phải là bản ghi bất biến,
     // không phụ thuộc prototype của đối tượng DTO.
-    const rawPayload = options.rawPayload ?? (JSON.parse(JSON.stringify(dto)) as Record<string, unknown>);
+    const rawPayload =
+      options.rawPayload ??
+      (JSON.parse(JSON.stringify(dto)) as Record<string, unknown>);
     const verify = options.trusted
       ? { valid: true }
       : this.gateway.verifySignature({
-        gateway: dto.gateway,
-        txnRef: dto.txnRef,
-        gatewayTxnNo: dto.gatewayTxnNo,
-        amount: dto.amount,
-        success: dto.success,
-        responseCode: dto.responseCode ?? '00',
-        signature: dto.signature ?? null,
-      });
+          gateway: dto.gateway,
+          txnRef: dto.txnRef,
+          gatewayTxnNo: dto.gatewayTxnNo,
+          amount: dto.amount,
+          success: dto.success,
+          responseCode: dto.responseCode ?? '00',
+          signature: dto.signature ?? null,
+        });
 
     // Bước 1: ghi nhật ký ngay (append-only) – kể cả khi chữ ký sai.
-    const payment = await this.paymentRepo.findOne({ where: { gatewayTxnRef: dto.txnRef } });
+    const payment = await this.paymentRepo.findOne({
+      where: { gatewayTxnRef: dto.txnRef },
+    });
 
     if (!verify.valid) {
       await this.logEvent({
@@ -402,7 +508,11 @@ export class PaymentService {
         rawPayload,
       });
       this.logger.warn(`Webhook chữ ký sai cho ${dto.txnRef}`);
-      return { result: WebhookResult.INVALID, message: 'Chữ ký không hợp lệ', paymentId: payment?.id ?? null };
+      return {
+        result: WebhookResult.INVALID,
+        message: 'Chữ ký không hợp lệ',
+        paymentId: payment?.id ?? null,
+      };
     }
 
     if (!payment) {
@@ -416,12 +526,20 @@ export class PaymentService {
         result: WebhookResult.INVALID,
         rawPayload,
       });
-      return { result: WebhookResult.INVALID, message: 'Không tìm thấy giao dịch', paymentId: null };
+      return {
+        result: WebhookResult.INVALID,
+        message: 'Không tìm thấy giao dịch',
+        paymentId: null,
+      };
     }
 
     // Bước 2: idempotent – event đã xử lý thì bỏ qua nhưng vẫn báo "đã xử lý".
     const duplicated = await this.eventRepo.findOne({
-      where: { gateway: dto.gateway, gatewayTxnNo: dto.gatewayTxnNo, eventType },
+      where: {
+        gateway: dto.gateway,
+        gatewayTxnNo: dto.gatewayTxnNo,
+        eventType,
+      },
     });
     if (duplicated) {
       await this.logEvent({
@@ -434,115 +552,167 @@ export class PaymentService {
         result: WebhookResult.IGNORED,
         rawPayload,
       });
-      return { result: WebhookResult.IGNORED, message: 'Giao dịch đã được xử lý trước đó', paymentId: payment.id };
+      return {
+        result: WebhookResult.IGNORED,
+        message: 'Giao dịch đã được xử lý trước đó',
+        paymentId: payment.id,
+      };
     }
 
     // Bước 3: áp kết quả.
-    const outcome = await this.paymentRepo.manager.transaction(async (manager) => {
-      const locked = await this.lockPayment(manager, payment.id);
+    const outcome = await this.paymentRepo.manager.transaction(
+      async (manager) => {
+        const locked = await lockPayment(manager, payment.id);
 
-      if (locked.amount !== dto.amount) {
-        await this.logEvent({
-          paymentId: locked.id,
-          gateway: dto.gateway,
-          txnRef: dto.txnRef,
-          gatewayTxnNo: dto.gatewayTxnNo,
-          eventType,
-          signatureValid: true,
-          result: WebhookResult.INVALID,
-          rawPayload,
-        }, manager);
-        return { result: WebhookResult.INVALID, message: 'Số tiền không khớp với giao dịch', paymentId: locked.id };
-      }
+        if (locked.amount !== dto.amount) {
+          await this.logEvent(
+            {
+              paymentId: locked.id,
+              gateway: dto.gateway,
+              txnRef: dto.txnRef,
+              gatewayTxnNo: dto.gatewayTxnNo,
+              eventType,
+              signatureValid: true,
+              result: WebhookResult.INVALID,
+              rawPayload,
+            },
+            manager,
+          );
+          return {
+            result: WebhookResult.INVALID,
+            message: 'Số tiền không khớp với giao dịch',
+            paymentId: locked.id,
+          };
+        }
 
-      if (this.isPaidStatus(locked.status)) {
-        await this.logEvent({
-          paymentId: locked.id,
-          gateway: dto.gateway,
-          txnRef: dto.txnRef,
-          gatewayTxnNo: dto.gatewayTxnNo,
-          eventType,
-          signatureValid: true,
-          result: WebhookResult.IGNORED,
-          rawPayload,
-        }, manager);
-        return { result: WebhookResult.IGNORED, message: 'Giao dịch đã ở trạng thái thành công', paymentId: locked.id };
-      }
+        if (isPaidStatus(locked.status)) {
+          await this.logEvent(
+            {
+              paymentId: locked.id,
+              gateway: dto.gateway,
+              txnRef: dto.txnRef,
+              gatewayTxnNo: dto.gatewayTxnNo,
+              eventType,
+              signatureValid: true,
+              result: WebhookResult.IGNORED,
+              rawPayload,
+            },
+            manager,
+          );
+          return {
+            result: WebhookResult.IGNORED,
+            message: 'Giao dịch đã ở trạng thái thành công',
+            paymentId: locked.id,
+          };
+        }
 
-      if (!dto.success) {
-        locked.status = PaymentStatus.FAILED;
-        await manager.save(Payment, locked);
-        await this.logEvent({
-          paymentId: locked.id,
-          gateway: dto.gateway,
-          txnRef: dto.txnRef,
-          gatewayTxnNo: dto.gatewayTxnNo,
-          eventType,
-          signatureValid: true,
-          result: WebhookResult.PROCESSED,
-          rawPayload,
-        }, manager);
-        return { result: WebhookResult.PROCESSED, message: 'Ghi nhận giao dịch thất bại', paymentId: locked.id };
-      }
+        if (!dto.success) {
+          locked.status = PaymentStatus.FAILED;
+          await manager.save(Payment, locked);
+          await this.logEvent(
+            {
+              paymentId: locked.id,
+              gateway: dto.gateway,
+              txnRef: dto.txnRef,
+              gatewayTxnNo: dto.gatewayTxnNo,
+              eventType,
+              signatureValid: true,
+              result: WebhookResult.PROCESSED,
+              rawPayload,
+            },
+            manager,
+          );
+          return {
+            result: WebhookResult.PROCESSED,
+            message: 'Ghi nhận giao dịch thất bại',
+            paymentId: locked.id,
+          };
+        }
 
-      // The booking lock serializes different payment attempts for the same order.
-      const booking = await this.lockBooking(manager, locked.bookingId);
-      const alreadyPaid = await manager.getRepository(Payment).existsBy({
-        bookingId: booking.id, id: Not(locked.id),
-        status: In([PaymentStatus.SUCCESS, PaymentStatus.PARTIALLY_REFUNDED, PaymentStatus.REFUNDED]),
-      });
-      if (this.isBookingClosed(booking.status) || alreadyPaid) {
+        // The booking lock serializes different payment attempts for the same order.
+        const booking = await this.lockBooking(manager, locked.bookingId);
+        const alreadyPaid = await manager.getRepository(Payment).existsBy({
+          bookingId: booking.id,
+          id: Not(locked.id),
+          status: In([
+            PaymentStatus.SUCCESS,
+            PaymentStatus.PARTIALLY_REFUNDED,
+            PaymentStatus.REFUNDED,
+          ]),
+        });
+        if (this.isBookingClosed(booking.status) || alreadyPaid) {
+          locked.status = PaymentStatus.SUCCESS;
+          locked.paidAt = new Date();
+          locked.gatewayTxnNo = dto.gatewayTxnNo;
+          await manager.save(Payment, locked);
+
+          const refund = manager.create(Refund, {
+            paymentId: locked.id,
+            amount: locked.amount,
+            status: RefundStatus.PENDING,
+            reason: alreadyPaid
+              ? RefundReason.DUPLICATE_PAYMENT
+              : RefundReason.LATE_PAYMENT,
+            isManual: true,
+            errorMessage: null,
+          });
+          await manager.save(Refund, refund);
+
+          await this.logEvent(
+            {
+              paymentId: locked.id,
+              gateway: dto.gateway,
+              txnRef: dto.txnRef,
+              gatewayTxnNo: dto.gatewayTxnNo,
+              eventType,
+              signatureValid: true,
+              result: WebhookResult.LATE,
+              rawPayload,
+            },
+            manager,
+          );
+
+          this.logger.warn(
+            `Tiền về muộn cho booking ${booking.code} – đã tạo yêu cầu hoàn tự động`,
+          );
+          return {
+            result: WebhookResult.LATE,
+            message: alreadyPaid
+              ? 'Đơn đã được thanh toán – đã tạo yêu cầu hoàn khoản thanh toán trùng'
+              : 'Booking đã đóng – đã tạo yêu cầu hoàn tiền',
+            paymentId: locked.id,
+          };
+        }
+
+        // Đường đi bình thường.
         locked.status = PaymentStatus.SUCCESS;
         locked.paidAt = new Date();
         locked.gatewayTxnNo = dto.gatewayTxnNo;
+        locked.expiresAt = null;
         await manager.save(Payment, locked);
 
-        const refund = manager.create(Refund, {
+        await this.logEvent(
+          {
+            paymentId: locked.id,
+            gateway: dto.gateway,
+            txnRef: dto.txnRef,
+            gatewayTxnNo: dto.gatewayTxnNo,
+            eventType,
+            signatureValid: true,
+            result: WebhookResult.PROCESSED,
+            rawPayload,
+          },
+          manager,
+        );
+
+        await this.receipts.record(manager, booking, locked);
+        return {
+          result: WebhookResult.PROCESSED,
+          message: 'Thanh toán thành công',
           paymentId: locked.id,
-          amount: locked.amount,
-          status: RefundStatus.PENDING,
-          reason: alreadyPaid ? RefundReason.DUPLICATE_PAYMENT : RefundReason.LATE_PAYMENT,
-          isManual: true,
-          errorMessage: null,
-        });
-        await manager.save(Refund, refund);
-
-        await this.logEvent({
-          paymentId: locked.id,
-          gateway: dto.gateway,
-          txnRef: dto.txnRef,
-          gatewayTxnNo: dto.gatewayTxnNo,
-          eventType,
-          signatureValid: true,
-          result: WebhookResult.LATE,
-          rawPayload,
-        }, manager);
-
-        this.logger.warn(`Tiền về muộn cho booking ${booking.code} – đã tạo yêu cầu hoàn tự động`);
-        return { result: WebhookResult.LATE, message: alreadyPaid ? 'Đơn đã được thanh toán – đã tạo yêu cầu hoàn khoản thanh toán trùng' : 'Booking đã đóng – đã tạo yêu cầu hoàn tiền', paymentId: locked.id };
-      }
-
-      // Đường đi bình thường.
-      locked.status = PaymentStatus.SUCCESS;
-      locked.paidAt = new Date();
-      locked.gatewayTxnNo = dto.gatewayTxnNo;
-      locked.expiresAt = null;
-      await manager.save(Payment, locked);
-
-      await this.logEvent({
-        paymentId: locked.id,
-        gateway: dto.gateway,
-        txnRef: dto.txnRef,
-        gatewayTxnNo: dto.gatewayTxnNo,
-        eventType,
-        signatureValid: true,
-        result: WebhookResult.PROCESSED,
-        rawPayload,
-      }, manager);
-
-      await this.onPaymentSucceeded(manager, booking, locked);
-      return { result: WebhookResult.PROCESSED, message: 'Thanh toán thành công', paymentId: locked.id };
-    });
+        };
+      },
+    );
 
     return outcome;
   }
@@ -564,133 +734,45 @@ export class PaymentService {
       result: WebhookResult.INVALID,
       rawPayload: input.rawPayload ?? { reason: input.reason },
     });
-    return { result: WebhookResult.INVALID, message: input.reason, paymentId: null };
+    return {
+      result: WebhookResult.INVALID,
+      message: input.reason,
+      paymentId: null,
+    };
   }
 
   /** Danh sách `payment_events` của một giao dịch (đối soát). */
   async listEvents(paymentId: string) {
     await this.getOrFail(paymentId);
-    return this.eventRepo.find({ where: { paymentId }, order: { createdAt: 'DESC' } });
-  }
-
-  // ===== hoàn tiền =====
-
-  async createRefund(dto: CreateRefundDto, actor: AuthenticatedUser): Promise<RefundView> {
-    const refund = await this.paymentRepo.manager.transaction(async (manager) => {
-      const payment = await this.lockPayment(manager, dto.paymentId);
-      if (!this.isPaidStatus(payment.status)) {
-        throw new ConflictException('Chỉ hoàn tiền cho giao dịch đã thanh toán thành công');
-      }
-
-      const refundable = payment.refundableAmount();
-      if (refundable <= 0) throw new ConflictException('Giao dịch này đã được hoàn toàn bộ');
-
-      const amount = dto.amount ?? refundable;
-      if (amount > refundable) {
-        throw new BadRequestException(
-          `Số tiền hoàn (${amount.toLocaleString('vi-VN')}đ) vượt quá số còn lại (${refundable.toLocaleString('vi-VN')}đ)`,
-        );
-      }
-
-      if (dto.cancelRequestId) {
-        const cancelRequest = await manager.getRepository(CancelRequest).findOne({
-          where: { id: dto.cancelRequestId },
-        });
-        if (!cancelRequest) throw new NotFoundException('Không tìm thấy yêu cầu hủy');
-        if (cancelRequest.bookingId !== payment.bookingId) {
-          throw new BadRequestException('Yêu cầu hủy không thuộc booking của giao dịch này');
-        }
-      }
-
-      return manager.save(
-        Refund,
-        manager.create(Refund, {
-          paymentId: payment.id,
-          cancelRequestId: dto.cancelRequestId ?? null,
-          amount,
-          status: RefundStatus.PENDING,
-          reason: dto.reason,
-          gatewayRef: dto.gatewayRef ?? null,
-          isManual: dto.isManual ?? true,
-          errorMessage: dto.note ?? null,
-        }),
-      );
+    return this.eventRepo.find({
+      where: { paymentId },
+      order: { createdAt: 'DESC' },
     });
-
-    this.logger.log(`Tạo yêu cầu hoàn ${refund.amount}đ cho payment ${dto.paymentId} (bởi ${actor.email})`);
-    return this.toRefundView(refund);
   }
 
-  /** Xác nhận đã chuyển tiền hoàn → cộng `refunded_amount`, có thể chuyển payment sang REFUNDED. */
-  async completeRefund(refundId: string, dto: CompleteRefundDto, actor: AuthenticatedUser): Promise<RefundView> {
-    const refund = await this.paymentRepo.manager.transaction(async (manager) => {
-      const locked = await manager.getRepository(Refund).findOne({
-        where: { id: refundId },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (!locked) throw new NotFoundException('Không tìm thấy yêu cầu hoàn tiền');
-      if (locked.status === RefundStatus.REFUNDED) return locked;
-      if (locked.status !== RefundStatus.PENDING) {
-        throw new ConflictException('Yêu cầu hoàn tiền đã kết thúc');
-      }
-
-      const payment = await this.lockPayment(manager, locked.paymentId);
-      const refundedAfter = payment.refundedAmount + locked.amount;
-      if (refundedAfter > payment.amount) {
-        throw new ConflictException('Tổng tiền hoàn vượt quá số tiền giao dịch');
-      }
-
-      payment.refundedAmount = refundedAfter;
-      payment.status =
-        refundedAfter >= payment.amount ? PaymentStatus.REFUNDED : PaymentStatus.PARTIALLY_REFUNDED;
-      await manager.save(Payment, payment);
-
-      locked.status = RefundStatus.REFUNDED;
-      locked.refundedAt = new Date();
-      locked.processedBy = actor.id;
-      if (dto.gatewayRef) locked.gatewayRef = dto.gatewayRef;
-      return manager.save(Refund, locked);
-    });
-
-    this.logger.log(`Hoàn tất hoàn tiền ${refund.amount}đ (bởi ${actor.email})`);
-    return this.toRefundView(refund);
+  // ===== hoàn tiền: giữ API công khai, xử lý trong RefundService =====
+  createRefund(
+    dto: CreateRefundDto,
+    actor: AuthenticatedUser,
+  ): Promise<RefundView> {
+    return this.refunds.createRefund(dto, actor);
   }
-
-  async rejectRefund(refundId: string, errorMessage: string, actor: AuthenticatedUser): Promise<RefundView> {
-    const refund = await this.refundRepo.manager.transaction(async (manager) => {
-      const locked = await manager.getRepository(Refund).findOne({
-        where: { id: refundId },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (!locked) throw new NotFoundException('Không tìm thấy yêu cầu hoàn tiền');
-      if (locked.status !== RefundStatus.PENDING) {
-        throw new ConflictException('Yêu cầu hoàn tiền đã kết thúc');
-      }
-
-      locked.status = RefundStatus.FAILED;
-      locked.errorMessage = errorMessage.trim();
-      locked.processedBy = actor.id;
-      locked.refundedAt = null;
-      return manager.save(Refund, locked);
-    });
-
-    return this.toRefundView(refund);
+  completeRefund(
+    id: string,
+    dto: CompleteRefundDto,
+    actor: AuthenticatedUser,
+  ): Promise<RefundView> {
+    return this.refunds.completeRefund(id, dto, actor);
   }
-
-  async paginateRefunds(query: QueryRefundsDto) {
-    const page = Math.max(1, query.page ?? 1);
-    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
-
-    const qb = this.refundRepo.createQueryBuilder('refund');
-    if (query.status) qb.andWhere('refund.status = :status', { status: query.status });
-    if (query.paymentId) qb.andWhere('refund.paymentId = :paymentId', { paymentId: query.paymentId });
-
-    qb.orderBy('refund.createdAt', 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit);
-
-    const [refunds, total] = await qb.getManyAndCount();
-    return { items: refunds.map((refund) => this.toRefundView(refund)), total, page, limit };
+  rejectRefund(
+    id: string,
+    message: string,
+    actor: AuthenticatedUser,
+  ): Promise<RefundView> {
+    return this.refunds.rejectRefund(id, message, actor);
+  }
+  paginateRefunds(query: QueryRefundsDto) {
+    return this.refunds.paginateRefunds(query);
   }
 
   // ===== job nền =====
@@ -702,11 +784,14 @@ export class PaymentService {
       .update(Payment)
       .set({ status: PaymentStatus.EXPIRED })
       .where('status = :pending', { pending: PaymentStatus.PENDING })
-      .andWhere('expires_at IS NOT NULL AND expires_at <= :now', { now: new Date() })
+      .andWhere('expires_at IS NOT NULL AND expires_at <= :now', {
+        now: new Date(),
+      })
       .execute();
 
     const affected = result.affected ?? 0;
-    if (affected > 0) this.logger.log(`Đã đánh dấu ${affected} giao dịch thanh toán hết hạn`);
+    if (affected > 0)
+      this.logger.log(`Đã đánh dấu ${affected} giao dịch thanh toán hết hạn`);
     return affected;
   }
 
@@ -716,95 +801,86 @@ export class PaymentService {
    * Ghi nhận thanh toán thủ công (tiền mặt / duyệt chứng từ) rồi xác nhận booking.
    * Tách khỏi `handleWebhook` vì không có IPN: người thao tác là nhân viên.
    */
-  private async confirmManualPayment(paymentId: string, actor: AuthenticatedUser, note: string): Promise<PaymentView> {
-    const bookingId = await this.paymentRepo.manager.transaction(async (manager) => {
-      const payment = await this.lockPayment(manager, paymentId);
-      if (this.isPaidStatus(payment.status)) return payment.bookingId;
-      if (![PaymentStatus.PENDING, PaymentStatus.PROOF_SUBMITTED].includes(payment.status)) {
-        throw new ConflictException('Giao dịch không còn ở trạng thái có thể xác nhận');
-      }
-      if (payment.method === PaymentMethod.BANK_TRANSFER && payment.status !== PaymentStatus.PROOF_SUBMITTED) {
-        throw new ConflictException('Chỉ duyệt chuyển khoản đã gửi chứng từ');
-      }
-      if (![PaymentMethod.BANK_TRANSFER, PaymentMethod.OFFICE].includes(payment.method)) {
-        throw new ConflictException('Giao dịch qua cổng phải được xác nhận bằng webhook');
-      }
+  private async confirmManualPayment(
+    paymentId: string,
+    actor: AuthenticatedUser,
+    note: string,
+  ): Promise<PaymentView> {
+    const bookingId = await this.paymentRepo.manager.transaction(
+      async (manager) => {
+        const payment = await lockPayment(manager, paymentId);
+        if (isPaidStatus(payment.status)) return payment.bookingId;
+        if (
+          ![PaymentStatus.PENDING, PaymentStatus.PROOF_SUBMITTED].includes(
+            payment.status,
+          )
+        ) {
+          throw new ConflictException(
+            'Giao dịch không còn ở trạng thái có thể xác nhận',
+          );
+        }
+        if (
+          payment.method === PaymentMethod.BANK_TRANSFER &&
+          payment.status !== PaymentStatus.PROOF_SUBMITTED
+        ) {
+          throw new ConflictException('Chỉ duyệt chuyển khoản đã gửi chứng từ');
+        }
+        if (
+          ![PaymentMethod.BANK_TRANSFER, PaymentMethod.OFFICE].includes(
+            payment.method,
+          )
+        ) {
+          throw new ConflictException(
+            'Giao dịch qua cổng phải được xác nhận bằng webhook',
+          );
+        }
 
-      const booking = await this.lockBooking(manager, payment.bookingId);
-      if (this.isBookingClosed(booking.status)) {
-        throw new ConflictException(`Booking đang ở trạng thái ${booking.status} – không thể ghi nhận thanh toán`);
-      }
-      const paid = await manager.getRepository(Payment).existsBy({
-        bookingId: booking.id, status: PaymentStatus.SUCCESS,
-      });
-      if (paid) throw new ConflictException('Đơn đã được thanh toán bằng giao dịch khác');
+        const booking = await this.lockBooking(manager, payment.bookingId);
+        if (this.isBookingClosed(booking.status)) {
+          throw new ConflictException(
+            `Booking đang ở trạng thái ${booking.status} – không thể ghi nhận thanh toán`,
+          );
+        }
+        const paid = await manager.getRepository(Payment).existsBy({
+          bookingId: booking.id,
+          status: PaymentStatus.SUCCESS,
+        });
+        if (paid)
+          throw new ConflictException(
+            'Đơn đã được thanh toán bằng giao dịch khác',
+          );
 
-      payment.status = PaymentStatus.SUCCESS;
-      payment.paidAt = new Date();
-      payment.reviewedBy = actor.id;
-      payment.expiresAt = null;
-      payment.proofNote = [payment.proofNote, note].filter(Boolean).join('\n');
-      await manager.save(Payment, payment);
+        payment.status = PaymentStatus.SUCCESS;
+        payment.paidAt = new Date();
+        payment.reviewedBy = actor.id;
+        payment.expiresAt = null;
+        payment.proofNote = [payment.proofNote, note]
+          .filter(Boolean)
+          .join('\n');
+        await manager.save(Payment, payment);
 
-      await this.onPaymentSucceeded(manager, booking, payment);
-      return payment.bookingId;
-    });
+        await this.receipts.record(manager, booking, payment);
+        return payment.bookingId;
+      },
+    );
 
     const payment = await this.getOrFail(paymentId);
-    this.logger.log(`Ghi nhận thanh toán ${payment.amount}đ cho booking ${bookingId} (bởi ${actor.email})`);
+    this.logger.log(
+      `Ghi nhận thanh toán ${payment.amount}đ cho booking ${bookingId} (bởi ${actor.email})`,
+    );
     return this.toView(payment);
   }
 
-  /**
-   * Side-effect khi payment SUCCESS: booking chờ thanh toán → chờ xác nhận.
-   *
-   * Cố ý **không** gọi thẳng `BookingService.confirm` (mở transaction riêng, đã bị
-   * khóa bởi transaction này). Việc chuyển CONFIRMED vẫn do nhân viên thực hiện ở
-   * `PATCH /bookings/:id/confirm` với `booking:confirm` – giữ đúng mô hình:
-   * tiền về ⇒ chờ duyệt ⇒ xác nhận ⇒ tăng `sold_seats`.
-   */
-  private async onPaymentSucceeded(manager: EntityManager, booking: Booking, payment: Payment): Promise<void> {
-    if (booking.status === BookingStatus.PENDING_PAYMENT) {
-      const closed = await manager.getRepository(Booking).findOne({
-        where: { id: booking.id },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (closed && closed.status === BookingStatus.PENDING_PAYMENT) {
-        closed.transitionTo(BookingStatus.PENDING_CONFIRMATION);
-        closed.expiresAt = null;
-        await manager.save(Booking, closed);
-      }
-    }
-    // Chốt sổ cái mã giảm giá: RESERVED → CONFIRMED khi tiền đã về.
-    // Idempotent: gọi lại (IPN trùng) chỉ cập nhật 0 dòng.
-    await this.promotions.confirmRedemption(booking.id, manager);
-    const invoice = await this.invoices.issue(booking.id, manager);
-    await this.mail.enqueue(manager, {
-      deduplicationKey: `payment-receipt:${payment.id}`,
-      recipient: invoice.snapshot.customerEmail,
-      subject: `Xác nhận thanh toán đơn ${booking.code} – ${invoice.number}`,
-      html: renderInvoice(invoice),
-      text: `Xin chào ${invoice.snapshot.customerName},\nĐã nhận thanh toán ${payment.amount.toLocaleString('vi-VN')} VND cho đơn ${booking.code}.\nTour: ${invoice.snapshot.tourName}\nHóa đơn: ${invoice.number}\nVui lòng mở tệp hóa đơn đính kèm để xem và in. Trạng thái xác nhận chuyến đi được cập nhật trong tài khoản của bạn.`,
-      attachmentName: `hoa-don-${invoice.number}.html`,
-    });
-  }
-
-  private async lockBooking(manager: EntityManager, id: string): Promise<Booking> {
+  private async lockBooking(
+    manager: EntityManager,
+    id: string,
+  ): Promise<Booking> {
     const booking = await manager.getRepository(Booking).findOne({
       where: { id },
       lock: { mode: 'pessimistic_write' },
     });
     if (!booking) throw new NotFoundException('Không tìm thấy booking');
     return booking;
-  }
-
-  private async lockPayment(manager: EntityManager, id: string): Promise<Payment> {
-    const payment = await manager.getRepository(Payment).findOne({
-      where: { id },
-      lock: { mode: 'pessimistic_write' },
-    });
-    if (!payment) throw new NotFoundException('Không tìm thấy giao dịch thanh toán');
-    return payment;
   }
 
   private async logEvent(
@@ -839,7 +915,9 @@ export class PaymentService {
   /** Không tạo giao dịch mới cho booking đã đóng / đã thanh toán. */
   private assertBookableForPayment(booking: Booking): void {
     if (this.isBookingClosed(booking.status)) {
-      throw new ConflictException(`Booking đang ở trạng thái ${booking.status} – không thể thanh toán`);
+      throw new ConflictException(
+        `Booking đang ở trạng thái ${booking.status} – không thể thanh toán`,
+      );
     }
   }
 
@@ -848,14 +926,6 @@ export class PaymentService {
       status === BookingStatus.CANCELLED ||
       status === BookingStatus.REJECTED ||
       status === BookingStatus.EXPIRED
-    );
-  }
-
-  private isPaidStatus(status: PaymentStatus): boolean {
-    return (
-      status === PaymentStatus.SUCCESS ||
-      status === PaymentStatus.PARTIALLY_REFUNDED ||
-      status === PaymentStatus.REFUNDED
     );
   }
 
@@ -875,7 +945,9 @@ export class PaymentService {
       .where('payment.gatewayTxnRef LIKE :prefix', { prefix: `${prefix}%` })
       .getRawOne<{ maxRef: string | null }>();
 
-    const current = row?.maxRef ? Number(String(row.maxRef).replace(/\D/g, '').slice(-6)) : 0;
+    const current = row?.maxRef
+      ? Number(String(row.maxRef).replace(/\D/g, '').slice(-6))
+      : 0;
     const next = Number.isFinite(current) ? current + 1 : 1;
     return `${prefix}${String(next).padStart(6, '0')}`;
   }
@@ -901,23 +973,6 @@ export class PaymentService {
       expiresAt: payment.expiresAt ?? null,
       createdAt: payment.createdAt,
       updatedAt: payment.updatedAt,
-    };
-  }
-
-  private toRefundView(refund: Refund): RefundView {
-    return {
-      id: refund.id,
-      paymentId: refund.paymentId,
-      cancelRequestId: refund.cancelRequestId ?? null,
-      amount: refund.amount,
-      status: refund.status,
-      reason: refund.reason,
-      gatewayRef: refund.gatewayRef ?? null,
-      isManual: refund.isManual,
-      processedBy: refund.processedBy ?? null,
-      refundedAt: refund.refundedAt ?? null,
-      errorMessage: refund.errorMessage ?? null,
-      createdAt: refund.createdAt,
     };
   }
 }

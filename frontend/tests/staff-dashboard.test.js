@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bookingChart, bookingLink, vietnamToday } from '../src/staff-dashboard.js';
+import { bookingChart, bookingLink, vietnamToday } from '../src/features/staff/dashboard.js';
 
 test('staff charts count recorded booking statuses, not assumed payments', () => {
   const chart = bookingChart([{ createdAt: '2026-01-02T00:00:00Z', status: 'CONFIRMED' }, { createdAt: '2026-01-03', status: 'CANCEL_REQUESTED' }, { createdAt: '2025-02-03', status: 'CONFIRMED' }, { status: 'EXPIRED' }], 2026);

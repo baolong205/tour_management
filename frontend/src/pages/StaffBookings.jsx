@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useEffect, useRef, useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../services/api.js';
-import { date, money, queryString, statusLabels } from '../utils.js';
-import { bookingActions, bookingStatuses, cancellationBody, validateDateRange } from '../staff-operations.js';
+import { date, money, queryString, statusLabels } from '../lib/utils.js';
+import { bookingActions, bookingStatuses, cancellationBody, validateDateRange } from '../features/staff/operations.js';
 import { Icon, Pagination, State } from '../components/UI.jsx';
-import { OperationBadge, OperationEmpty, OperationFacts, OperationHeader } from '../components/StaffOperations.jsx';
-import InvoiceButton from '../components/InvoiceButton.jsx';
+import { OperationBadge, OperationEmpty, OperationFacts, OperationHeader } from '../features/staff/components/StaffOperations.jsx';
+import InvoiceButton from '../features/payment/components/InvoiceButton.jsx';
 
 function BookingDetail({ id, revision, refresh, onClose }) {
   const { can } = useAuth();

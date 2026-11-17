@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canEnterWorkspace, csvCell, reportCsv, management } from '../src/management.js';
-import { buildFormBody } from '../src/forms.js';
+import { canEnterWorkspace, csvCell, reportCsv, management } from '../src/features/management/catalog.js';
+import { buildFormBody } from '../src/features/management/forms.js';
 
 test('customer cannot enter staff workspace merely with tour:read', () => {
   assert.equal(canEnterWorkspace({ roles: ['CUSTOMER'], permissions: ['tour:read'] }), false);

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { queryString } from '../utils.js';
+import { queryString } from '../lib/utils.js';
 import Brand from './Brand.jsx';
 import { Icon } from './UI.jsx';
-import { cleanTourFilter } from '../tour-search.js';
+import { cleanTourFilter } from '../features/tours/search.js';
 
 export default function Navbar({ path }) {
   const [open, setOpen] = useState(false);

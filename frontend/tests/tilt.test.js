@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { observeTilt, tiltValues } from '../src/tilt.js';
+import { observeTilt, tiltValues } from '../src/lib/tilt.js';
 
 test('tilt is neutral at center, bounded at edges, safe for zero dimensions', () => {
   const rect = { left: 0, top: 0, width: 200, height: 100 };

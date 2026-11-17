@@ -3,6 +3,7 @@ import { Booking } from '../booking/entities/booking.entity.js';
 import { Payment } from './entities/payment.entity.js';
 import { BookingStatus, PaymentMethod, PaymentStatus, WebhookResult } from '../../common/enums/index.js';
 import type { AuthenticatedUser } from '../../common/auth/auth.types.js';
+import { PaymentReceiptService } from './services/payment-receipt.service.js';
 
 function fixture() {
   const booking = Object.assign(new Booking(), { id: 'booking', code: 'BK260001', customerId: 'customer', status: BookingStatus.PENDING_PAYMENT, total: 900_000 });
@@ -19,26 +20,24 @@ function fixture() {
   const invoices = { issue: vi.fn().mockResolvedValue(invoice) };
   const mail = { enqueue: vi.fn().mockResolvedValue(undefined) };
   const repo: any = { ...paymentRepository, manager };
-  // Tham số cuối là `PromotionService` – chỉ cần `confirmRedemption` để chốt sổ cái.
   const promotions = { confirmRedemption: vi.fn().mockResolvedValue(1) };
-  const service = new PaymentService(
-    repo, {} as any, eventRepository as any,
-    { getOrFail: vi.fn().mockResolvedValue(booking) } as any,
-    {} as any, invoices as any, mail as any, promotions as any,
-  );
+  const receipts = new PaymentReceiptService(invoices as any, mail as any, promotions as any);
+  const service = new PaymentService(repo, {} as any, eventRepository as any, { getOrFail: vi.fn().mockResolvedValue(booking) } as any, {} as any, receipts, {} as any);
   const webhook = { txnRef: 'REF001', gateway: 'VNPAY', gatewayTxnNo: 'GATE001', amount: 900_000, success: true };
   return { service, booking, payment, manager, invoices, mail, promotions, webhook, paymentRepository };
 }
 
 describe('Payment receipt workflow', () => {
   it('records a payment, invoice and queued email together; repeated webhook has no second receipt', async () => {
-    const { service, webhook, booking, invoices, mail, manager } = fixture();
+    const { service, webhook, booking, invoices, mail, manager, promotions } = fixture();
     expect(await service.handleWebhook(webhook, { trusted: true })).toMatchObject({ result: WebhookResult.PROCESSED });
     expect(booking.status).toBe(BookingStatus.PENDING_CONFIRMATION);
+    expect(promotions.confirmRedemption).toHaveBeenCalledWith('booking', manager);
     expect(invoices.issue).toHaveBeenCalledWith('booking', manager);
     expect(mail.enqueue).toHaveBeenCalledWith(manager, expect.objectContaining({ deduplicationKey: 'payment-receipt:payment', recipient: 'customer@example.test', attachmentName: 'hoa-don-INV2026-TEST.html' }));
     expect(await service.handleWebhook(webhook, { trusted: true })).toMatchObject({ result: WebhookResult.IGNORED });
     expect(invoices.issue).toHaveBeenCalledTimes(1); expect(mail.enqueue).toHaveBeenCalledTimes(1);
+    expect(promotions.confirmRedemption).toHaveBeenCalledTimes(1);
   });
 
   it.each([{ success: false }, { amount: 1 }])('does not issue receipts for failed or mismatched payments: %j', async override => {

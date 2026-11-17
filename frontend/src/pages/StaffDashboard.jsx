@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useApi } from '../hooks.js';
-import { permittedStaffSections } from '../staff-navigation.js';
-import { bookingChart, bookingLink, vietnamToday } from '../staff-dashboard.js';
-import { date, statusLabels } from '../utils.js';
+import { useApi } from '../hooks/use-api.js';
+import { permittedStaffSections } from '../features/staff/navigation.js';
+import { bookingChart, bookingLink, vietnamToday } from '../features/staff/dashboard.js';
+import { date, statusLabels } from '../lib/utils.js';
 import { Icon, State } from '../components/UI.jsx';
 
 const statusColors = { CONFIRMED: '#0068ff', PENDING_PAYMENT: '#00b77b', PENDING_CONFIRMATION: '#ff9900', CANCEL_REQUESTED: '#f05a65', CANCELLED: '#ff3949', COMPLETED: '#9caac2', REJECTED: '#b080d5', EXPIRED: '#c6cdd9' };

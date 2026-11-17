@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useEffect, useMemo, useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { api } from '../services/api.js';
-import { date, money } from '../utils.js';
+import { date, money } from '../lib/utils.js';
 import { parseCustomerIds, scopeLabel, scopeSummary, scopeTypes } from '../promotion-ui.js';
 import { Icon, State } from './UI.jsx';
 
@@ -25,7 +25,6 @@ export default function PromotionAdmin() {
 
   const list = useApi('/promotions?limit=100', revision);
   const promotions = useMemo(() => list.data?.items ?? [], [list.data]);
-  const selected = promotions.find(promotion => promotion.id === selectedId) ?? null;
 
   const scopes = useApi(selectedId ? `/promotions/${selectedId}/scopes` : null, revision);
   const assignments = useApi(selectedId ? `/promotions/${selectedId}/assignments` : null, revision);

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
 import { api } from '../services/api.js';
 import TourCard from '../components/TourCard.jsx';
 import { Icon, State } from '../components/UI.jsx';

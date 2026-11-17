@@ -1,6 +1,5 @@
-import React from 'react';
 import { assetUrl } from '../services/api.js';
-import { money } from '../utils.js';
+import { money } from '../lib/utils.js';
 import { Icon } from './UI.jsx';
 
 export default function TourCard({ tour }) {

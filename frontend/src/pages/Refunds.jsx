@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
-import { money } from '../utils.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
+import { money } from '../lib/utils.js';
 import ActionForm from '../components/ActionForm.jsx';
 import ActionDialog from '../components/ActionDialog.jsx';
 import { Pagination, State } from '../components/UI.jsx';

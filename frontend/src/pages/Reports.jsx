@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks.js';
-import { money, queryString } from '../utils.js';
-import { reportCsv } from '../management.js';
+import { useState } from 'react';
+import { useApi } from '../hooks/use-api.js';
+import { money, queryString } from '../lib/utils.js';
+import { reportCsv } from '../features/management/catalog.js';
 import { State } from '../components/UI.jsx';
 
 export default function Reports() {

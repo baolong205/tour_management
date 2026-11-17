@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { passengerGroups, canRequestCancellation, bookingProgress, isAccountPath } from '../src/booking-view.js';
+import { passengerGroups, canRequestCancellation, bookingProgress, isAccountPath } from '../src/features/booking/view.js';
 
 test('booking totals group passengers by both ticket type and recorded unit price', () => {
   const groups = passengerGroups([{ type: 'ADULT', unitPrice: 1000000 }, { type: 'ADULT', unitPrice: '1000000' }, { type: 'CHILD', unitPrice: 700000 }, { type: 'ADULT', unitPrice: 900000 }]);
