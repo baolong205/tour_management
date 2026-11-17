@@ -9,6 +9,15 @@
     { "code": "DEMO-SP", "file": "sa-pa.jpg", "photoId": 36754846, "alt": "Nhà cửa và sườn núi xanh ở Sa Pa", "source": "https://www.pexels.com/photo/36754846/" },
     { "code": "DEMO-DL", "file": "da-lat.jpg", "photoId": 35731527, "alt": "Hoàng hôn trên đồi, ảnh minh họa hành trình Đà Lạt", "source": "https://www.pexels.com/photo/35731527/" },
     { "code": "DEMO-HL", "file": "ha-long.jpg", "photoId": 7276642, "alt": "Trải nghiệm chèo kayak giữa những núi đá vôi trên vịnh", "source": "https://www.pexels.com/photo/7276642/" },
-    { "code": "DEMO-NB", "file": "ninh-binh.jpg", "photoId": 30280829, "alt": "Thuyền nhỏ trên sông giữa đồng ruộng và núi đá vôi", "source": "https://www.pexels.com/photo/30280829/" }
+    { "code": "DEMO-NB", "file": "ninh-binh.jpg", "photoId": 30280829, "alt": "Thuyền nhỏ trên sông giữa đồng ruộng và núi đá vôi", "source": "https://www.pexels.com/photo/30280829/" },
+    { "code": "DEMO-NT", "file": "nha-trang.jpg", "photoId": "ID_NT", "alt": "Bãi biển và vịnh Nha Trang", "source": "https://www.pexels.com/photo/ID_NT/" },
+    { "code": "DEMO-HUE", "file": "hue.jpg", "photoId": "ID_HUE", "alt": "Cảnh cố đô Huế, ảnh minh họa hành trình Huế", "source": "https://www.pexels.com/photo/ID_HUE/" },
+    { "code": "DEMO-QN", "file": "quy-nhon.jpg", "photoId": "ID_QN", "alt": "Bờ biển Quy Nhơn, ảnh minh họa hành trình Quy Nhơn – Phú Yên", "source": "https://www.pexels.com/photo/ID_QN/" },
+    { "code": "DEMO-CT", "file": "can-tho.jpg", "photoId": "ID_CT", "alt": "Sông nước miền Tây, ảnh minh họa hành trình Cần Thơ", "source": "https://www.pexels.com/photo/ID_CT/" },
+    { "code": "DEMO-MC", "file": "moc-chau.jpg", "photoId": "ID_MC", "alt": "Đồi chè và cao nguyên Mộc Châu", "source": "https://www.pexels.com/photo/ID_MC/" },
+    { "code": "DEMO-HG", "file": "ha-giang.jpg", "photoId": "ID_HG", "alt": "Đường đèo và núi non Hà Giang", "source": "https://www.pexels.com/photo/ID_HG/" },
+    { "code": "DEMO-CD", "file": "con-dao.jpg", "photoId": "ID_CD", "alt": "Bãi biển hoang sơ, ảnh minh họa hành trình Côn Đảo", "source": "https://www.pexels.com/photo/ID_CD/" },
+    { "code": "DEMO-PN", "file": "phong-nha.jpg", "photoId": "ID_PN", "alt": "Rừng núi và hang động Phong Nha – Quảng Bình", "source": "https://www.pexels.com/photo/ID_PN/" },
+    { "code": "DEMO-MN", "file": "mui-ne.jpg", "photoId": "ID_MN", "alt": "Đồi cát và biển Mũi Né", "source": "https://www.pexels.com/photo/ID_MN/" }
   ]
 }

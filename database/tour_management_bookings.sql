@@ -1,0 +1,85 @@
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
+--
+-- Host: 127.0.0.1    Database: tour_management
+-- ------------------------------------------------------
+-- Server version	8.4.7
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `bookings`
+--
+
+DROP TABLE IF EXISTS `bookings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bookings` (
+  `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `code` varchar(20) NOT NULL,
+  `schedule_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `customer_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `created_by` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+  `channel` varchar(20) NOT NULL DEFAULT 'ONLINE',
+  `contact_name` varchar(150) NOT NULL,
+  `contact_phone` varchar(20) NOT NULL,
+  `contact_email` varchar(191) NOT NULL,
+  `subtotal` decimal(14,0) NOT NULL,
+  `discount` decimal(14,0) NOT NULL DEFAULT '0',
+  `total` decimal(14,0) NOT NULL,
+  `promotion_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+  `status` varchar(30) NOT NULL DEFAULT 'PENDING_PAYMENT',
+  `status_before_cancel` varchar(30) DEFAULT NULL,
+  `expires_at` datetime(3) DEFAULT NULL,
+  `hold_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+  `seat_count` int unsigned NOT NULL,
+  `confirmed_by` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+  `confirmed_at` datetime(3) DEFAULT NULL,
+  `note` text,
+  `version` int NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_bookings_code` (`code`),
+  KEY `idx_bookings_status_expires` (`status`,`expires_at`),
+  KEY `idx_bookings_customer_created` (`customer_id`,`created_at`),
+  KEY `idx_bookings_schedule` (`schedule_id`),
+  KEY `FK_44342bfa812465df91df3d9a152` (`created_by`),
+  KEY `FK_841d786908fe85c96a15a4a4ba3` (`confirmed_by`),
+  KEY `idx_bookings_promotion_customer` (`promotion_id`,`customer_id`,`status`),
+  CONSTRAINT `FK_44342bfa812465df91df3d9a152` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_46ae392cd3300686701e58bf585` FOREIGN KEY (`promotion_id`) REFERENCES `promotions` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_841d786908fe85c96a15a4a4ba3` FOREIGN KEY (`confirmed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_8e21b7ae33e7b0673270de4146f` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
+  CONSTRAINT `FK_c752b8edf0efcd91adf6ec45d40` FOREIGN KEY (`schedule_id`) REFERENCES `departure_schedules` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bookings`
+--
+
+LOCK TABLES `bookings` WRITE;
+/*!40000 ALTER TABLE `bookings` DISABLE KEYS */;
+INSERT INTO `bookings` VALUES ('1519b12f-c0c1-4510-b13d-a7cd7a0154ea','2026-11-10 16:42:04.581','2026-11-10 16:42:33.408','BK260001','a1645990-07d7-4d74-9911-b609f8d0a83c','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',1417500,0,1417500,NULL,'PENDING_CONFIRMATION',NULL,NULL,'17d178e5-70d1-4f19-b49f-43bfc8220237',1,NULL,NULL,NULL,2),('399cfa8f-b57b-4759-9884-0783f6e806c6','2026-11-11 12:57:35.677','2026-11-11 12:57:42.039','BK260006','74a00bcd-3e84-4d3d-8c17-3bafd1101d7e','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',3367500,0,3367500,NULL,'PENDING_CONFIRMATION',NULL,NULL,'cb7ca8ad-1201-4edc-9e30-8f7cc600be1d',1,NULL,NULL,NULL,2),('42762754-7ba7-4ae3-8aed-db0a41bc475f','2026-11-10 16:45:05.290','2026-11-10 16:45:16.996','BK260002','a1645990-07d7-4d74-9911-b609f8d0a83c','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',1417500,0,1417500,NULL,'PENDING_CONFIRMATION',NULL,NULL,'4994f3c9-469e-4d8f-acdc-f5d57c0e7f4e',1,NULL,NULL,NULL,2),('5f7e3478-5dfc-42c5-8014-b977d6f45ed5','2026-11-11 12:32:20.540','2026-11-11 12:32:27.818','BK260003','74a00bcd-3e84-4d3d-8c17-3bafd1101d7e','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',3367500,0,3367500,NULL,'PENDING_CONFIRMATION',NULL,NULL,'dad2bbf7-b415-4df4-a781-8728451811ef',1,NULL,NULL,NULL,2),('687f40b0-5407-4859-b5ad-f79f3c636e12','2026-11-11 12:49:53.471','2026-11-11 12:50:03.968','BK260004','a1645990-07d7-4d74-9911-b609f8d0a83c','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',1417500,0,1417500,NULL,'PENDING_CONFIRMATION',NULL,NULL,'f307e2b5-5ae3-4c49-ac80-26bfe251c01d',1,NULL,NULL,NULL,2),('8dbe7a53-1df2-4535-8616-e9691331b48c','2026-11-11 12:59:09.510','2026-11-11 12:59:14.945','BK260007','3f91df1b-b9ca-4110-b6b0-9a437e10c081','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',2692500,0,2692500,NULL,'PENDING_CONFIRMATION',NULL,NULL,'0d50e981-f7bf-4a7b-b312-c8c66b708085',1,NULL,NULL,NULL,2),('c0f4eba1-6851-4186-81e3-f150e8026355','2026-11-16 10:23:25.261','2026-11-16 22:45:00.028','BK260010','a1645990-07d7-4d74-9911-b609f8d0a83c','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',1890000,0,1890000,NULL,'EXPIRED',NULL,NULL,'8caf41b8-de4f-47e4-9006-cdd62a162df4',1,NULL,NULL,NULL,2),('c62f0869-cf1c-4088-859a-057d5eb1d16b','2026-11-11 12:53:45.322','2026-11-11 12:53:53.229','BK260005','3502f0aa-555d-4b8d-8fce-a78388b4bbef','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',1417500,0,1417500,NULL,'PENDING_CONFIRMATION',NULL,NULL,'c4e4d4ba-7142-4bf0-8121-4b9e6faafda9',1,NULL,NULL,NULL,2),('ebf6cffa-d947-4a02-b05b-c401198d8645','2026-11-15 12:56:36.535','2026-11-15 12:56:48.119','BK260009','a1645990-07d7-4d74-9911-b609f8d0a83c','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',1890000,0,1890000,NULL,'PENDING_CONFIRMATION',NULL,NULL,'f6c62b14-67b1-4fbb-a4d2-7e89613abf2d',1,NULL,NULL,NULL,2),('f07c9d21-438f-4223-a26f-e26d79f7580c','2026-11-13 22:09:16.917','2026-11-13 22:09:25.691','BK260008','a1645990-07d7-4d74-9911-b609f8d0a83c','e366fbee-3ab1-4241-87d7-b6eb09bceab2',NULL,'ONLINE','Tran Ngoc Hoang','+84987180042','hoangdtntaluoi@gmail.com',2835000,141750,2693250,'9678ff9c-20e9-4f85-b23d-eeee462ae7c1','PENDING_CONFIRMATION',NULL,NULL,'b07ae907-0368-4b63-ae4d-3f7df3e789c3',2,NULL,NULL,NULL,2);
+/*!40000 ALTER TABLE `bookings` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-11-17 11:49:51

@@ -24,7 +24,6 @@ export default function CustomerLogin({ register, busy, error, submit, toggleReg
       </form>
       {!register && <><div className="login-divider"><span>hoặc</span></div><div className="login-social"><button type="button" disabled><span className="google-symbol" aria-hidden="true">G</span>Đăng nhập với Google</button><button type="button" disabled><span className="facebook-symbol" aria-hidden="true">f</span>Đăng nhập với Facebook</button></div><p className="login-social-note">Google / Facebook chưa được tích hợp. Vui lòng dùng email.</p></>}
       <p className="login-switch">{register ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'} <button className="text-button" disabled={busy} onClick={toggleRegister}>{register ? 'Đăng nhập' : 'Đăng ký ngay'}</button></p>
-      <a className="login-internal" href="#/staff/login">Cổng đăng nhập nhân viên <Icon name="arrow" size={13} /></a><a className="login-internal" href="#/admin/login">Cổng đăng nhập Admin <Icon name="arrow" size={13} /></a>
     </div></section>
   </div>;
 }

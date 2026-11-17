@@ -188,12 +188,19 @@ export function Sheet({ open, onClose, title, children, footer }: React.PropsWit
   </Modal>;
 }
 
-/** Khối tổng kết dùng trong thanh dính đáy. */
+/**
+ * Khối tổng kết dùng trong thanh dính đáy.
+ *
+ * Bắt buộc phải co được (`flex: 1` + `minWidth: 0` ở cả khung ngoài lẫn khối chữ):
+ * trong một hàng `flexDirection: 'row'`, React Native mặc định `flexShrink: 0`, nên nếu
+ * khối này giữ nguyên bề ngang theo nội dung (nhãn + số tiền serif 26px + caption) thì
+ * nó sẽ đẩy CTA nằm cùng hàng ra ngoài mép phải màn hình → nút "Xem giá" bị ẩn trên máy hẹp.
+ */
 export function FooterTotal({ label, value, caption }: { label: string; value: string; caption?: string }) {
   return <View style={s.footerTotal}>
-    <View style={s.flex}>
-      <Text style={s.footerLabel}>{label}</Text>
-      <Text style={s.footerValue}>{value}</Text>
+    <View style={s.footerTotalCopy}>
+      <Text style={s.footerLabel} numberOfLines={1}>{label}</Text>
+      <Text style={s.footerValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{value}</Text>
       {!!caption && <Text style={s.footerCaption} numberOfLines={1}>{caption}</Text>}
     </View>
   </View>;
@@ -298,9 +305,10 @@ const s = StyleSheet.create({
   listValue: { fontSize: 13, color: palette.muted, maxWidth: '48%', textAlign: 'right' },
 
   footer: { borderTopWidth: 1, borderTopColor: palette.line, backgroundColor: palette.cream, paddingHorizontal: 18, paddingTop: 12, gap: 10, ...shadow.bar },
-  footerTotal: { flexDirection: 'row', alignItems: 'baseline', gap: 12 },
+  footerTotal: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'baseline', gap: 12 },
+  footerTotalCopy: { flex: 1, minWidth: 0 },
   footerLabel: { fontSize: 9, fontWeight: '600', letterSpacing: tracking.label, textTransform: 'uppercase', color: palette.muted },
-  footerValue: { fontFamily: fonts.serif, fontSize: 26, lineHeight: 31, color: palette.ink },
+  footerValue: { fontFamily: fonts.serif, fontSize: 26, lineHeight: 31, color: palette.ink, flexShrink: 1 },
   footerCaption: { fontSize: 11, color: palette.muted, marginTop: 2 },
 
   sheetRoot: { flex: 1, justifyContent: 'flex-end' },

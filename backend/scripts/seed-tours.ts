@@ -72,6 +72,95 @@ const tours = [
       ['Hang Múa – Trở về Hà Nội', 'Dùng bữa sáng, tham quan Hang Múa và ngắm cảnh theo sức khỏe, điều kiện thời tiết. Trả phòng, thưởng thức ẩm thực địa phương rồi trở về Hà Nội.'],
     ],
   },
+  {
+    code: 'DEMO-NT', slug: 'demo-nha-trang-3n2d', name: 'Nha Trang: Nắng vàng biển xanh',
+    category: 'Biển & di sản', categorySlug: 'demo-bien-di-san', city: 'TP. Hồ Chí Minh', price: 3890000,
+    summary: 'Tắm biển, khám phá các đảo quanh vịnh Nha Trang và thưởng thức hải sản tươi ngon.',
+    days: [
+      ['TP. Hồ Chí Minh – Nha Trang', 'Đón đoàn tại điểm hẹn, di chuyển đến Nha Trang. Nhận phòng, buổi chiều tự do tắm biển và dạo phố biển.'],
+      ['Tour đảo – Vịnh Nha Trang', 'Đi tàu tham quan các đảo trong vịnh, tắm biển và tham gia hoạt động ngoài trời tùy điều kiện thời tiết. Buổi tối tự do.'],
+      ['Tháp Bà Ponagar – Tạm biệt Nha Trang', 'Tham quan Tháp Bà Ponagar, mua sắm đặc sản, trả phòng và trở về TP. Hồ Chí Minh.'],
+    ],
+  },
+  {
+    code: 'DEMO-HUE', slug: 'demo-hue-co-do-3n2d', name: 'Huế: Dấu xưa cố đô',
+    category: 'Biển & di sản', categorySlug: 'demo-bien-di-san', city: 'Hà Nội', price: 4290000,
+    summary: 'Thăm Đại Nội, lăng tẩm triều Nguyễn, nghe ca Huế trên sông Hương và thưởng thức ẩm thực cung đình.',
+    days: [
+      ['Hà Nội – Huế – Sông Hương', 'Đón đoàn tại sân bay Huế, nhận phòng. Buổi tối đi thuyền trên sông Hương, nghe ca Huế.'],
+      ['Đại Nội – Lăng tẩm', 'Tham quan Đại Nội Huế, chùa Thiên Mụ và một số lăng tẩm triều Nguyễn theo lịch trình của đoàn.'],
+      ['Chợ Đông Ba – Trở về', 'Mua sắm đặc sản tại chợ Đông Ba, trả phòng và di chuyển ra sân bay.'],
+    ],
+  },
+  {
+    code: 'DEMO-QN', slug: 'demo-quy-nhon-phu-yen-4n3d', name: 'Quy Nhơn – Phú Yên: Miền biển hoang sơ',
+    category: 'Biển & di sản', categorySlug: 'demo-bien-di-san', city: 'TP. Hồ Chí Minh', price: 5290000,
+    summary: 'Khám phá Kỳ Co, Eo Gió, Gành Đá Đĩa và những bãi biển yên tĩnh của miền Trung.',
+    days: [
+      ['Đến Quy Nhơn', 'Đón đoàn tại sân bay Phù Cát, về thành phố nhận phòng. Dạo biển và thưởng thức bún chả cá.'],
+      ['Kỳ Co – Eo Gió', 'Di chuyển đến Kỳ Co, tắm biển và tham quan Eo Gió. Nghỉ đêm tại Quy Nhơn.'],
+      ['Gành Đá Đĩa – Phú Yên', 'Tham quan Gành Đá Đĩa, Mũi Điện theo điều kiện thời tiết. Nhận phòng tại Tuy Hòa.'],
+      ['Tuy Hòa – Tiễn đoàn', 'Tự do mua sắm đặc sản, trả phòng và đưa đoàn ra sân bay.'],
+    ],
+  },
+  {
+    code: 'DEMO-CT', slug: 'demo-can-tho-mien-tay-2n1d', name: 'Cần Thơ: Sông nước miền Tây',
+    category: 'Văn hóa & ẩm thực', categorySlug: 'demo-van-hoa-am-thuc', city: 'TP. Hồ Chí Minh', price: 1790000,
+    summary: 'Trải nghiệm chợ nổi Cái Răng, vườn trái cây và ẩm thực miệt vườn Nam Bộ.',
+    days: [
+      ['TP. Hồ Chí Minh – Cần Thơ', 'Đón đoàn, di chuyển đến Cần Thơ. Tham quan vườn trái cây, dùng bữa trưa đặc sản. Buổi tối dạo bến Ninh Kiều.'],
+      ['Chợ nổi Cái Răng – Trở về', 'Đi thuyền tham quan chợ nổi Cái Răng vào buổi sáng sớm, dùng bữa sáng rồi trả phòng và trở về TP. Hồ Chí Minh.'],
+    ],
+  },
+  {
+    code: 'DEMO-MC', slug: 'demo-moc-chau-2n1d', name: 'Mộc Châu: Đồi chè và mùa hoa',
+    category: 'Núi & thiên nhiên', categorySlug: 'demo-nui-thien-nhien', city: 'Hà Nội', price: 1990000,
+    summary: 'Ngắm đồi chè, thung lũng hoa theo mùa và thưởng thức sữa, đặc sản vùng cao nguyên.',
+    days: [
+      ['Hà Nội – Mộc Châu', 'Đón đoàn tại Hà Nội, di chuyển đến Mộc Châu. Tham quan đồi chè trái tim và các điểm check-in theo mùa. Nhận phòng nghỉ đêm.'],
+      ['Thác Dải Yếm – Trở về', 'Tham quan thác Dải Yếm, mua đặc sản địa phương, trả phòng và trở về Hà Nội.'],
+    ],
+  },
+  {
+    code: 'DEMO-HG', slug: 'demo-ha-giang-4n3d', name: 'Hà Giang: Hành trình cực Bắc',
+    category: 'Núi & thiên nhiên', categorySlug: 'demo-nui-thien-nhien', city: 'Hà Nội', price: 4890000,
+    summary: 'Chinh phục đèo Mã Pí Lèng, ngắm sông Nho Quế và khám phá văn hóa các dân tộc vùng cao.',
+    days: [
+      ['Hà Nội – Hà Giang', 'Đón đoàn tại Hà Nội, di chuyển đến thành phố Hà Giang, nhận phòng và nghỉ ngơi.'],
+      ['Quản Bạ – Yên Minh – Đồng Văn', 'Qua Cổng Trời Quản Bạ, rừng thông Yên Minh và đến cao nguyên đá Đồng Văn. Nghỉ đêm tại Đồng Văn.'],
+      ['Mã Pí Lèng – Sông Nho Quế', 'Chinh phục đèo Mã Pí Lèng, đi thuyền trên sông Nho Quế theo điều kiện thời tiết. Nghỉ đêm tại Mèo Vạc.'],
+      ['Hà Giang – Hà Nội', 'Dùng bữa sáng, trả phòng và di chuyển về Hà Nội.'],
+    ],
+  },
+  {
+    code: 'DEMO-CD', slug: 'demo-con-dao-3n2d', name: 'Côn Đảo: Hành trình tâm linh và biển xanh',
+    category: 'Nghỉ dưỡng', categorySlug: 'demo-nghi-duong', city: 'TP. Hồ Chí Minh', price: 6490000,
+    summary: 'Viếng các di tích lịch sử, tắm biển hoang sơ và tận hưởng không gian yên bình của đảo.',
+    days: [
+      ['TP. Hồ Chí Minh – Côn Đảo', 'Đón đoàn tại sân bay Côn Đảo, nhận phòng. Buổi chiều tham quan các di tích lịch sử trên đảo.'],
+      ['Biển Đầm Trầu – Hòn Bảy Cạnh', 'Tắm biển, tham quan các điểm thiên nhiên theo điều kiện thời tiết và thư giãn buổi tối.'],
+      ['Chợ Côn Đảo – Trở về', 'Mua đặc sản, trả phòng và ra sân bay.'],
+    ],
+  },
+  {
+    code: 'DEMO-PN', slug: 'demo-phong-nha-quang-binh-3n2d', name: 'Phong Nha – Quảng Bình: Thế giới hang động',
+    category: 'Núi & thiên nhiên', categorySlug: 'demo-nui-thien-nhien', city: 'Hà Nội', price: 4190000,
+    summary: 'Khám phá động Phong Nha, Thiên Đường và vẻ đẹp rừng núi vườn quốc gia.',
+    days: [
+      ['Hà Nội – Đồng Hới – Phong Nha', 'Đón đoàn tại sân bay Đồng Hới, di chuyển đến Phong Nha, nhận phòng và dạo quanh thị trấn.'],
+      ['Động Phong Nha – Động Thiên Đường', 'Đi thuyền vào động Phong Nha, tham quan động Thiên Đường theo lịch trình của đoàn.'],
+      ['Suối Moọc – Trở về', 'Tham quan suối Moọc, dùng bữa trưa, trả phòng và ra sân bay.'],
+    ],
+  },
+  {
+    code: 'DEMO-MN', slug: 'demo-mui-ne-phan-thiet-2n1d', name: 'Mũi Né: Đồi cát và biển gió',
+    category: 'Nghỉ dưỡng', categorySlug: 'demo-nghi-duong', city: 'TP. Hồ Chí Minh', price: 1590000,
+    summary: 'Ngắm bình minh trên đồi cát, ghé suối Tiên, làng chài và thưởng thức hải sản Phan Thiết.',
+    days: [
+      ['TP. Hồ Chí Minh – Mũi Né', 'Đón đoàn, di chuyển đến Mũi Né. Tham quan suối Tiên, làng chài và nhận phòng. Buổi tối thưởng thức hải sản.'],
+      ['Đồi cát – Trở về', 'Ngắm bình minh trên đồi cát, dùng bữa sáng, trả phòng và trở về TP. Hồ Chí Minh.'],
+    ],
+  },
 ];
 
 // Lấy ngày theo giờ Việt Nam rồi cộng ngày thuần, không phụ thuộc múi giờ máy chạy.

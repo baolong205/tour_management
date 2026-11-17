@@ -16,13 +16,13 @@ Tài liệu dành cho quản trị viên (ADMIN), nhân viên (STAFF) và khách
 | Người sử dụng | Địa chỉ đăng nhập | Email | Mật khẩu | Sau khi đăng nhập |
 | --- | --- | --- | --- | --- |
 | Quản trị viên (ADMIN) | `http://localhost:5173/#/admin/login` | `admin@tour.local` | `Admin@123456` | Khu vực quản trị `#/admin` |
-| Nhân viên demo (STAFF) | `http://localhost:5173/#/staff/login` | `demo-staff-21cf99eb@example.test` | `Demo@21cf99eb123` | Khu vực nghiệp vụ `#/staff` |
+| Nhân viên demo (STAFF) | `http://localhost:5173/#/staff/login` | `demo-staff-21cf99eb@example.test` | `Admin@123456` | Khu vực nghiệp vụ `#/staff` |
 | Khách hàng (CUSTOMER) | `http://localhost:5173/#/login` | Email đã đăng ký | Mật khẩu đã tạo | Trang khách hàng hoặc trang đang cần đăng nhập |
 
 **Lưu ý về tài khoản mẫu:**
 
 - Admin là thông tin mặc định trong script seed. Nếu cấu hình `ADMIN_EMAIL`/`ADMIN_PASSWORD` khác hoặc mật khẩu đã được đổi, hãy dùng thông tin thực tế. Chạy lại seed không đặt lại mật khẩu tài khoản đã tồn tại.
-- STAFF demo là tài khoản đã được báo cáo sử dụng trong lần kiểm tra trước, không phải tài khoản mặc định được tạo trên mọi cơ sở dữ liệu. Tài liệu này chưa xác minh lại đăng nhập trực tiếp vào cơ sở dữ liệu hiện tại.
+- STAFF demo là tài khoản có trong cơ sở dữ liệu demo hiện tại, không phải tài khoản mặc định được tạo trên mọi cơ sở dữ liệu. Nếu đã đổi mật khẩu, dùng mật khẩu mới; nếu database mới chưa có tài khoản này, dùng Admin tạo nhân viên tại **Nhân viên & vai trò**.
 - Chưa có thông tin tài khoản khách hàng mẫu được xác nhận cho tài liệu này. Khách hàng hãy đăng ký theo mục 5, không dùng tài khoản Admin để thử chức năng khách hàng.
 
 ## 3. Hướng dẫn cho quản trị viên (ADMIN)

@@ -1,0 +1,58 @@
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
+--
+-- Host: 127.0.0.1    Database: tour_management
+-- ------------------------------------------------------
+-- Server version	8.4.7
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `destinations`
+--
+
+DROP TABLE IF EXISTS `destinations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `destinations` (
+  `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `name` varchar(150) NOT NULL,
+  `slug` varchar(170) NOT NULL,
+  `latitude` decimal(9,6) DEFAULT NULL,
+  `longitude` decimal(9,6) DEFAULT NULL,
+  `description` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_destinations_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `destinations`
+--
+
+LOCK TABLES `destinations` WRITE;
+/*!40000 ALTER TABLE `destinations` DISABLE KEYS */;
+INSERT INTO `destinations` VALUES ('3115955b-aacf-43f7-af89-d900a96a4804','2026-11-17 11:19:04.174','2026-11-17 11:19:04.174','Phú Quốc','phu-quoc',NULL,NULL,NULL),('39566ea4-2fe0-46c1-9b1b-3f1a116b0db5','2026-11-17 11:19:04.177','2026-11-17 11:19:04.177','Sa Pa','sa-pa',NULL,NULL,NULL),('6e0bf030-7507-4674-8463-11c6040c795b','2026-11-17 11:19:04.189','2026-11-17 11:19:04.189','Ninh Bình','ninh-binh',NULL,NULL,NULL),('71284a76-859e-49b1-88a2-0282ed4c1883','2026-11-17 11:19:04.182','2026-11-17 11:19:04.182','Đà Lạt','da-lat',NULL,NULL,NULL),('92d14ae0-4672-483e-a6ac-20996dd22a7e','2026-11-17 11:19:04.191','2026-11-17 11:19:04.191','Hoa Lư','hoa-lu',NULL,NULL,NULL),('ad376146-7ea5-4011-a3d6-4b7ed89a5eeb','2026-11-17 11:19:04.186','2026-11-17 11:19:04.186','Hạ Long','ha-long',NULL,NULL,NULL),('b11fbf9e-9f6a-4df0-8485-c8d28d9d9811','2026-11-17 11:19:04.193','2026-11-17 11:19:04.193','Tràng An','trang-an',NULL,NULL,NULL),('b7353f9a-e13a-4a86-bb85-90c3a2a9802b','2026-11-17 11:19:04.170','2026-11-17 11:19:04.170','Hội An','hoi-an',NULL,NULL,NULL),('b8f5ffd4-fad6-47c3-8dd3-eca98f96fb1d','2026-11-17 11:19:04.196','2026-11-17 11:19:04.196','Hang Múa','hang-mua',NULL,NULL,NULL),('d16494a7-2a65-4e6b-9dae-a67f826b49b2','2026-11-17 11:19:04.165','2026-11-17 11:19:04.165','Đà Nẵng','da-nang',NULL,NULL,NULL),('ddab9fab-fbf4-4388-856e-32a6a6b757a7','2026-11-17 11:19:04.180','2026-11-17 11:19:04.180','Fansipan','fansipan',NULL,NULL,NULL);
+/*!40000 ALTER TABLE `destinations` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-11-17 11:49:47

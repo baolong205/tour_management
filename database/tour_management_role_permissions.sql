@@ -1,0 +1,55 @@
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
+--
+-- Host: 127.0.0.1    Database: tour_management
+-- ------------------------------------------------------
+-- Server version	8.4.7
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `role_permissions`
+--
+
+DROP TABLE IF EXISTS `role_permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role_permissions` (
+  `role_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `permission_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  PRIMARY KEY (`role_id`,`permission_id`),
+  KEY `IDX_178199805b901ccd220ab7740e` (`role_id`),
+  KEY `IDX_17022daf3f885f7d35423e9971` (`permission_id`),
+  CONSTRAINT `FK_17022daf3f885f7d35423e9971e` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`),
+  CONSTRAINT `FK_178199805b901ccd220ab7740ec` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role_permissions`
+--
+
+LOCK TABLES `role_permissions` WRITE;
+/*!40000 ALTER TABLE `role_permissions` DISABLE KEYS */;
+INSERT INTO `role_permissions` VALUES ('0ac681a4-7915-492b-9cc3-519e4ad6045c','402c0c09-0339-4d0b-a428-3bfc725c3086'),('0ac681a4-7915-492b-9cc3-519e4ad6045c','b2f4a49e-2c3e-41a4-98b7-74353447a223'),('62dc93a4-ec6e-427b-858c-ab735270e8f2','126d469b-e912-42cf-acd7-4b956430406a'),('62dc93a4-ec6e-427b-858c-ab735270e8f2','43666b46-4092-47fb-ae4a-d7f268e154e7'),('62dc93a4-ec6e-427b-858c-ab735270e8f2','b2f4a49e-2c3e-41a4-98b7-74353447a223'),('62dc93a4-ec6e-427b-858c-ab735270e8f2','b7387560-8007-48bc-ae5c-b434338a1555'),('62dc93a4-ec6e-427b-858c-ab735270e8f2','f70a7969-d57e-4164-b533-688fa9c17ca0'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','3e67cadb-939a-44b6-8a2e-133299c0da4e'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','402c0c09-0339-4d0b-a428-3bfc725c3086'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','43666b46-4092-47fb-ae4a-d7f268e154e7'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','69d3dcb4-ac3e-4ea4-91e7-ba6229b71c23'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','6bf6d492-0bd2-418e-a293-ce6e273384ed'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','8d869e4f-b3bf-40c7-9129-bb61a28c0935'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','a4bddc05-ace5-45d3-bae9-a7025a423607'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','b2f4a49e-2c3e-41a4-98b7-74353447a223'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','be7b647c-0695-4750-ac17-fdf90c8e2654'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','d25976dc-379f-4024-a925-6ab161477149'),('91d0dd5a-a6a9-442d-9a35-7a3da2ad1a7c','f70a7969-d57e-4164-b533-688fa9c17ca0'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','09ff5da8-58ac-41ae-89c9-b60ca7408956'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','126d469b-e912-42cf-acd7-4b956430406a'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','1c25b26e-8a37-49f3-bb02-7a3482882916'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','26eb48f8-120f-41e0-94c7-0fcd2b6a3759'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','38208464-c245-42c7-9d5e-163c0cd44773'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','3e67cadb-939a-44b6-8a2e-133299c0da4e'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','402c0c09-0339-4d0b-a428-3bfc725c3086'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','402fe5ac-1292-457b-bbe1-2c37fe08ea67'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','43666b46-4092-47fb-ae4a-d7f268e154e7'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','4d8e9315-2a0e-4f17-99cd-564f705dcd49'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','69d3dcb4-ac3e-4ea4-91e7-ba6229b71c23'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','6bf6d492-0bd2-418e-a293-ce6e273384ed'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','7ea13b1e-b09e-4ec6-82e2-5120681e51c6'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','8861caa7-636a-4937-8b9a-4c53901e0360'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','8d869e4f-b3bf-40c7-9129-bb61a28c0935'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','a4bddc05-ace5-45d3-bae9-a7025a423607'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','b2301fcc-67f9-415a-94f4-0c23d39eab9e'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','b2f4a49e-2c3e-41a4-98b7-74353447a223'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','b7387560-8007-48bc-ae5c-b434338a1555'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','baf0912f-9c17-4948-b20c-b08e00f6be1a'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','be7b647c-0695-4750-ac17-fdf90c8e2654'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','d25976dc-379f-4024-a925-6ab161477149'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','de170719-39b6-47ee-8e55-2ecb7c2da3a2'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','e3a8a242-aabb-4e4a-b38d-8f73098e6e64'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','f70a7969-d57e-4164-b533-688fa9c17ca0'),('b8574a2c-9cde-4614-9a7b-167b45dcb312','fffa79b3-d63e-4929-a48c-121f7ed2f573');
+/*!40000 ALTER TABLE `role_permissions` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-11-17 11:49:51

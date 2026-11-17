@@ -1,26 +1,71 @@
-# Hệ thống quản lý tour du lịch
+# TourGo — Hệ thống quản lý tour du lịch
 
-Backend NestJS, frontend React/Vite và MySQL. Chạy các lệnh dưới đây từ thư mục dự án.
-Ứng dụng Android/iOS dùng chung backend: [hướng dẫn chạy TourGo Mobile](mobile/README.md).
-Chức năng mã giảm giá, in hóa đơn và email thanh toán: [hướng dẫn cấu hình và sử dụng](docs/PAYMENT_RECEIPTS.md).
-Tìm kiếm tour và các bộ lọc: [hành vi, kết quả kiểm thử và cách chạy lại](docs/SEARCH_TESTING.md).
-Trên Windows PowerShell, dùng `npm.cmd` nếu `npm` bị chặn bởi execution policy.
+Dự án gồm ba phần dùng chung một backend NestJS và database MySQL:
 
-## Cài đặt và khởi tạo lần đầu
+| Thư mục | Mô tả | Công nghệ |
+| --- | --- | --- |
+| [`backend/`](backend/README.md) | API nghiệp vụ, xác thực, phân quyền | NestJS 12 + TypeORM + MySQL |
+| [`frontend/`](frontend/README.md) | Website khách hàng, nhân viên, quản trị | React 19 + Vite |
+| [`mobile/`](mobile/README.md) | Ứng dụng khách hàng Android/iOS | React Native + Expo SDK 57 |
 
-Cần Node.js 24.x (theo `.nvmrc`) và MySQL đang chạy.
+---
+
+## 1. Yêu cầu môi trường
+
+- **Node.js 24.x** — đúng phiên bản trong [`.nvmrc`](.nvmrc:1). Kiểm tra bằng `node --version`.
+- **MySQL 8** đang chạy, có tài khoản được phép tạo bảng trong database dự án.
+- **Git** (để clone mã nguồn).
+- Với mobile: điện thoại cài **Expo Go tương thích Expo SDK 57**, cùng Wi-Fi với máy tính.
+
+> Trên Windows PowerShell, dùng `npm.cmd` / `npx.cmd` để tránh lỗi execution policy.
+> Trên macOS/Linux dùng `npm` / `npx`.
+
+---
+
+## 2. Cài đặt lần đầu
+
+### Bước 1 — Cài thư viện và tạo file cấu hình
+
+Mở terminal tại **thư mục gốc dự án** và chạy:
+
+```powershell
+npm.cmd run setup
+```
+
+Lệnh này sẽ:
+
+- Cài dependencies cho cả `backend`, `frontend`, `mobile`.
+- Tạo `backend/.env` từ [`backend/.env.example`](backend/.env.example:1) với `JWT_SECRET`, `JWT_REFRESH_SECRET`, `PAYMENT_MOCK_SECRET` ngẫu nhiên (giữ nguyên nếu file đã tồn tại).
+- Tạo `frontend/.env` từ [`frontend/.env.example`](frontend/.env.example:1).
+
+### Bước 2 — Cấu hình MySQL
+
+Mở [`backend/.env`](backend/.env:1) và điền thông tin MySQL trên máy bạn:
+
+```dotenv
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=mat_khau_mysql_cua_ban
+DB_DATABASE=tour_management
+DB_SYNCHRONIZE=false
+```
+
+Nếu MySQL không đặt mật khẩu, để trống `DB_PASSWORD`.
+
+Tạo database nếu chưa có (MySQL Workbench hoặc MySQL CLI):
+
+```sql
+CREATE DATABASE IF NOT EXISTS tour_management
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### Bước 3 — Khởi tạo bảng và dữ liệu mẫu
+
+Từ thư mục gốc:
 
 ```powershell
 cd backend
-npm.cmd install
-# Chỉ sao chép nếu chưa có .env; sau đó điền thông tin MySQL và JWT.
-if (!(Test-Path .env)) { Copy-Item .env.example .env }
-```
-
-Tạo database `tour_management` trong MySQL nếu chưa có, dùng charset `utf8mb4`.
-`database/database.sql` hiện trống; khởi tạo bảng bằng entity:
-
-```powershell
 npm.cmd run db:check
 npm.cmd run db:sync
 npm.cmd run db:seed
@@ -28,68 +73,164 @@ npm.cmd run db:seed:tours
 npm.cmd run db:seed:images
 npm.cmd run db:seed:promotions
 npm.cmd run db:seed:destinations
+cd ..
 ```
 
-`db:sync` chỉ chạy khi database chưa có bảng. Nếu database đã có dữ liệu, dùng migration để cập nhật schema.
-Cờ `--force` xóa toàn bộ bảng và dữ liệu, chỉ dùng khi chủ động muốn dựng lại database.
-Các script database build vào `backend/dist-scripts`, tách khỏi bản build server trong `backend/dist`.
+| Lệnh | Tác dụng |
+| --- | --- |
+| `db:check` | Kiểm tra kết nối và trạng thái schema |
+| `db:sync` | Tạo bảng từ entity — **chỉ chạy khi database còn trống** |
+| `db:seed` | Upsert permission, role và tài khoản admin |
+| `db:seed:tours` | Thêm tour DEMO |
+| `db:seed:images` | Gắn ảnh tour vào DB và thư mục `uploads` |
+| `db:seed:promotions` | Thêm 10 mã ưu đãi |
+| `db:seed:destinations` | Liên kết điểm đến cho tour demo |
 
-## Chạy project
+> Nếu database đã có bảng, **bỏ qua `db:sync`**; khi cần cập nhật schema dùng `npm.cmd run db:migrate`.
 
-Terminal backend:
+### Bước 4 — Tài khoản demo để đăng nhập
+
+**Quản trị viên (ADMIN)** — tài khoản mặc định do `db:seed` tạo, đổi qua `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_FULL_NAME` trong `.env`:
+
+```
+email:    admin@tour.local
+password: Admin@123456
+đăng nhập: http://localhost:5173/#/admin/login  →  khu vực quản trị #/admin
+```
+
+**Nhân viên demo (STAFF)** — tài khoản đã có trong database demo:
+
+```
+email:    demo-staff-21cf99eb@example.test
+password: Admin@123456
+đăng nhập: http://localhost:5173/#/staff/login  →  khu vực nghiệp vụ #/staff
+```
+
+**Khách hàng (CUSTOMER)** — không có tài khoản mẫu; tự đăng ký tại `http://localhost:5173/#/login` (mật khẩu tối thiểu 8 ký tự, có chữ hoa, chữ thường và số).
+
+> Tài khoản STAFF demo không phải tài khoản mặc định được tạo trên mọi database — nếu đăng nhập thất bại, dùng tài khoản Admin để tạo nhân viên mới tại **Nhân viên & vai trò**. Không chạy lại `db:sync` để xử lý lỗi đăng nhập vì lệnh này có thể xóa dữ liệu. Mật khẩu trên đây là mật khẩu của database demo hiện tại; nếu bạn đã đổi mật khẩu thì dùng mật khẩu mới. Chi tiết xem [`docs/HUONG-DAN-DANG-NHAP.md`](docs/HUONG-DAN-DANG-NHAP.md:1).
+
+---
+
+## 3. Chạy dự án
+
+Từ **thư mục gốc**, chọn một trong các lệnh sau:
 
 ```powershell
+npm.cmd run dev          # backend + website + mobile
+npm.cmd run dev:web      # backend + website
+npm.cmd run dev:mobile   # backend + mobile (Expo)
+```
+
+Script tự động:
+
+- Khởi động backend và chờ đến khi endpoint `/api/health` sẵn sàng.
+- Chạy website tại `http://localhost:5173`.
+- Chạy Expo tại `http://localhost:8081` và tự chọn IP LAN để truyền địa chỉ API cho mobile.
+
+Nếu backend **đã chạy ở terminal khác**, thêm cờ `--reuse-api`:
+
+```powershell
+npm.cmd run dev:web -- --reuse-api
+```
+
+Nhấn `Ctrl+C` để dừng các dịch vụ do phiên đó khởi động.
+
+### Chạy riêng từng phần
+
+```powershell
+# Backend (watch mode) — http://localhost:3000/api
 cd backend
 npm.cmd run dev
-```
 
-Terminal frontend:
-
-```powershell
+# Website — http://localhost:5173
 cd frontend
-npm.cmd install
-# Tùy chọn: sao chép .env.example sang .env nếu cần đổi địa chỉ API.
 npm.cmd run dev
+
+# Mobile — quét QR bằng Expo Go
+cd mobile
+npm.cmd start
 ```
 
-- Giao diện: http://localhost:5173
-- API: http://localhost:3000/api
-- Trạng thái: http://localhost:3000/api/health
-- Swagger: http://localhost:3000/api/docs
+---
 
-Nếu đổi cổng backend, đặt `API_PROXY_TARGET` trong `frontend/.env` tương ứng.
-Tài khoản admin mặc định sau seed: `admin@tour.local` / `Admin@123456` (có thể đổi bằng `ADMIN_EMAIL`, `ADMIN_PASSWORD` trước khi seed).
+## 4. Mở ứng dụng mobile
 
-## Chạy mobile Android / iPhone
+1. Chạy `npm.cmd run dev:mobile` ở thư mục gốc.
+2. **Android:** mở Expo Go → quét QR trong terminal.
+3. **iPhone:** đăng nhập Expo Go bằng cùng tài khoản Expo với CLI, mở Camera quét QR, cho phép truy cập **Mạng cục bộ** khi được hỏi.
 
-Nếu lần đầu tải code về, làm theo [cài đặt và khởi tạo mobile](mobile/README.md)
-để cài thư viện, cấu hình MySQL và tạo dữ liệu mẫu. Khi đã cài đặt xong, mở
-terminal tại thư mục gốc `tour_management`:
+Chi tiết xem [`mobile/README.md`](mobile/README.md:1).
+
+---
+
+## 5. Kiểm thử và build
 
 ```powershell
-# Khởi động backend và Expo, tự lấy IP Wi-Fi cho điện thoại.
-npm.cmd run dev:mobile
+npm.cmd run check              # test + build + lint toàn bộ ba phần
+npm.cmd run build              # build backend, frontend và kiểm tra export mobile
+npm.cmd run check:integration  # test tích hợp backend (e2e, checkout, search)
+npm.cmd test                   # test script tiện ích ở thư mục gốc
 ```
 
-Nếu backend đã chạy, dùng lệnh sau thay cho lệnh trên:
+Chạy test riêng từng phần:
 
 ```powershell
-npm.cmd run dev:mobile -- --reuse-api
+cd backend  && npm.cmd test    # vitest
+cd frontend && npm.cmd test    # node --test
+cd mobile   && npm.cmd test    # node --test
 ```
 
-Cài Expo Go tương thích SDK 57, kết nối điện thoại cùng Wi-Fi với máy tính rồi
-quét QR. iPhone dùng Camera để mở liên kết bằng Expo Go; đăng nhập cùng tài khoản
-Expo trên điện thoại và Expo CLI. Tạo tài khoản khách hàng trong app để đặt tour.
+---
 
-Nhấn `w` trong terminal Expo để xem bản mobile trên trình duyệt tại
-http://localhost:8081. Dừng bằng `Ctrl+C`. Hướng dẫn quét QR, cấu hình API và
-xử lý lỗi **could not connect to the server** có trong [mobile/README.md](mobile/README.md).
+## 6. Cấu hình bổ sung
 
-## Kiểm tra
+Các biến quan trọng trong [`backend/.env`](backend/.env:1):
 
-Trong `backend`: `npm.cmd run build`, `npm.cmd test`, `npm.cmd run lint`, `npm.cmd run test:e2e`.
-E2e cần database đã được khởi tạo và kiểm tra các API công khai, xác thực và validation.
+| Biến | Mặc định | Ý nghĩa |
+| --- | --- | --- |
+| `PORT` | `3000` | Cổng backend |
+| `API_PREFIX` | `api` | Tiền tố đường dẫn API |
+| `CORS_ORIGIN` | `http://localhost:5173,http://localhost:8081` | Origin được phép |
+| `RESPONSE_ENVELOPE` | `false` | Bọc response thành `{ success, data, ... }` |
+| `MAIL_ENABLED` | `false` | Bật gửi email xác nhận thanh toán qua SMTP |
+| `UPLOAD_DIR` | `uploads` | Thư mục lưu tệp tải lên |
 
-Trong `frontend`: `npm.cmd run build`, `npm.cmd test`.
+Cấu hình frontend trong [`frontend/.env`](frontend/.env:1):
 
-Không sửa trực tiếp `backend/dist`: đây là mã sinh ra từ `backend/src` khi build.
+| Biến | Mặc định | Ý nghĩa |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | `/api` | Đường dẫn API phía client |
+| `API_PROXY_TARGET` | `http://localhost:3000` | Backend đích cho Vite proxy (dev) |
+| `API_PROXY_PREFIX` | `/api` | Tiền tố proxy |
+
+Cấu hình mobile trong `mobile/.env` (tùy chọn — `dev:mobile` tự điền):
+
+```dotenv
+EXPO_PUBLIC_API_URL=http://192.168.1.10:3000/api
+```
+
+---
+
+## 7. Xử lý sự cố thường gặp
+
+| Hiện tượng | Cách xử lý |
+| --- | --- |
+| `Thiếu backend/.env` | Chạy `npm.cmd run setup` rồi điền cấu hình MySQL |
+| `Thiếu dependencies của ...` | Chạy `npm.cmd run setup` |
+| `Cổng API 3000 đang được dùng` | Dừng backend cũ hoặc thêm `-- --reuse-api` |
+| `Cổng 5173/8081 đang được dùng` | Dừng phiên web/Metro cũ trước khi chạy lại |
+| `Backend chưa sẵn sàng sau 90 giây` | Kiểm tra MySQL đang chạy và log backend |
+| Mobile không kết nối API | Đảm bảo điện thoại cùng Wi-Fi; đổi Wi-Fi thì chạy lại `dev:mobile` để tạo QR mới |
+| Không đăng nhập được tài khoản STAFF demo | Tài khoản demo không có trên mọi database; dùng Admin tạo nhân viên mới. **Không** chạy `db:sync` để sửa lỗi đăng nhập vì có thể xóa dữ liệu |
+
+---
+
+## 8. Tài liệu liên quan
+
+- [`backend/README.md`](backend/README.md:1) — xác thực, phân quyền, bảo mật, seed.
+- [`frontend/README.md`](frontend/README.md:1) — chức năng website, hiệu ứng, triển khai.
+- [`mobile/README.md`](mobile/README.md:1) — hướng dẫn chi tiết ứng dụng di động.
+- [`docs/HUONG-DAN-DANG-NHAP.md`](docs/HUONG-DAN-DANG-NHAP.md:1) — hướng dẫn đăng nhập theo vai trò ADMIN / STAFF / CUSTOMER.
+- [`docs/`](docs/FEATURE-CHECKLIST.md:1) — checklist tính năng và tài liệu nghiệp vụ.
+- [`database/`](database/tour_management_users.sql:1) — script SQL tham chiếu schema.
