@@ -24,14 +24,14 @@ export class GuideProfile extends BaseEntity {
 
   @Column({
     type: 'json',
-    default: () => "('[]')",
+    default: () => '(JSON_ARRAY())',
     transformer: stringArrayTransformer,
   })
   languages: string[];
 
   @Column({
     type: 'json',
-    default: () => "('[]')",
+    default: () => '(JSON_ARRAY())',
     transformer: stringArrayTransformer,
   })
   certificates: string[];

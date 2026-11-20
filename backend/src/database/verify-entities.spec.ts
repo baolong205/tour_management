@@ -70,6 +70,13 @@ describe('Entity metadata (không cần DB)', () => {
   });
 
   it('bảng nhiều-nhiều có PK kép đúng kỳ vọng', () => {
+    const guide = dataSource.getMetadata('guide_profiles');
+    for (const name of ['languages', 'certificates']) {
+      const column = guide.columns.find(item => item.databaseName === name);
+      expect(column?.type).toBe('json');
+      expect(typeof column?.default).toBe('function');
+      expect((column?.default as () => string)()).toBe('(JSON_ARRAY())');
+    }
     const existing = new Set(dataSource.entityMetadatas.map((m) => m.tableName));
     const pk = (table: string) =>
       dataSource

@@ -1,5 +1,6 @@
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 import { INITIAL_SCHEMA_SQL, INITIAL_TABLES } from './initial-schema.snapshot.js';
+import { compatibleBaselineSql } from './baseline-sql.js';
 
 /** Frozen baseline for new databases; adopts complete legacy schemas without rewriting them. */
 export class InitialSchema1794000000000 implements MigrationInterface {
@@ -19,7 +20,7 @@ export class InitialSchema1794000000000 implements MigrationInterface {
     const migrationTable = queryRunner.connection.options.migrationsTableName ?? 'migrations';
     const unexpected = tables.filter(table => ![migrationTable, 'typeorm_metadata'].includes(table.name));
     if (unexpected.length) throw new Error('Database không trống và không phải schema TourGo đầy đủ. Kiểm tra DB_DATABASE trước khi migrate.');
-    for (const sql of INITIAL_SCHEMA_SQL) await queryRunner.query(sql);
+    for (const sql of INITIAL_SCHEMA_SQL) await queryRunner.query(compatibleBaselineSql(sql));
   }
 
   async down(): Promise<void> {
