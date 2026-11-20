@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { databaseSsl } from './database-ssl.js';
 
 export default registerAs('database', () => ({
   type: 'mysql' as const,
@@ -12,4 +13,5 @@ export default registerAs('database', () => ({
   logging: process.env.DB_LOGGING === 'true',
   timezone: '+07:00',
   charset: 'utf8mb4',
+  ssl: databaseSsl(),
 }));

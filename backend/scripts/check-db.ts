@@ -45,6 +45,7 @@ const shouldSync = process.argv.includes('--sync') || force;
         logging: false,
         timezone: config.get<string>('database.timezone'),
         charset: config.get<string>('database.charset'),
+        ssl: config.get('database.ssl'),
         entities: ALL_ENTITIES,
       }),
     }),

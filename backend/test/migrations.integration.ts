@@ -189,6 +189,42 @@ describe('Versioned schema migrations (isolated MySQL)', () => {
     );
   });
 
+  it('upgrades legacy promotions without losing data and supports the booking promotion join', async () => {
+    const source = await scratch();
+    const runner = source.createQueryRunner();
+    try {
+      // Simulate an installation created before campaign columns and migration history.
+      for (const Migration of ALL_MIGRATIONS.slice(0, -1)) {
+        await new Migration().up(runner);
+      }
+      expect(await runner.hasColumn('promotions', 'name')).toBe(false);
+      const id = randomUUID();
+      await source.query(
+        `INSERT INTO promotions
+          (id, code, type, value, used_count, valid_from, valid_to)
+         VALUES (?, ?, 'FIXED_AMOUNT', 50000, 2, '2026-01-01', '2027-01-01')`,
+        [id, 'LEGACY50K'],
+      );
+
+      expect(await source.runMigrations({ transaction: 'each' })).toHaveLength(
+        ALL_MIGRATIONS.length,
+      );
+      const promotion = await source.getRepository('Promotion').findOneByOrFail({ id });
+      expect(promotion).toMatchObject({
+        id, code: 'LEGACY50K', value: 50000, usedCount: 2,
+        name: null, status: 'ACTIVE', kind: 'PUBLIC',
+      });
+      await expect(
+        source.getRepository('Booking').createQueryBuilder('booking')
+          .leftJoinAndSelect('booking.promotion', 'promotion')
+          .getManyAndCount(),
+      ).resolves.toEqual([[], 0]);
+      expect(await source.runMigrations({ transaction: 'each' })).toHaveLength(0);
+    } finally {
+      await runner.release();
+    }
+  });
+
   it('rejects a partial schema without altering existing tables or data', async () => {
     const source = await scratch();
     await source.query(

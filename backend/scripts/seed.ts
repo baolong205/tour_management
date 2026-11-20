@@ -40,6 +40,7 @@ import { User } from '../src/modules/users/entities/user.entity.js';
         logging: false,
         timezone: config.get<string>('database.timezone'),
         charset: config.get<string>('database.charset'),
+        ssl: config.get('database.ssl'),
         entities: ALL_ENTITIES,
       }),
     }),

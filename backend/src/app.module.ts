@@ -51,6 +51,7 @@ import { SupportModule } from './modules/support/support.module.js';
         logging: config.get<boolean>('database.logging'),
         timezone: config.get<string>('database.timezone'),
         charset: config.get<string>('database.charset'),
+        ssl: config.get('database.ssl'),
         // autoLoadEntities vẫn bật cho các feature module dùng forFeature();
         // đồng thời khai báo tường minh để mọi entity được nạp ngay cả khi
         // module của nó chưa được import (tránh lỗi quan hệ "Entity metadata not found").

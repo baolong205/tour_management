@@ -1,5 +1,10 @@
 # TourGo — Hệ thống quản lý tour du lịch
 
+## Deploy để nộp bài
+
+Hướng dẫn website Vercel, API Render và APK Android: `docs/DEPLOY-NOP-BAI.md`.
+Cấu hình deploy đã có trong repo; cần tài khoản dịch vụ và database cloud để tạo link/APK thật.
+
 Dự án gồm ba phần dùng chung một backend NestJS và database MySQL:
 
 | Thư mục | Mô tả | Công nghệ |

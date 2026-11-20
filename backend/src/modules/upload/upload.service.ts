@@ -6,9 +6,11 @@ import { randomUUID } from 'node:crypto';
 import {
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE_BYTES,
+  isUploadFolder,
   UPLOAD_PUBLIC_PREFIX,
   UPLOAD_ROOT,
 } from './upload.constants.js';
+import { uploadToCloudinary } from './cloudinary-storage.js';
 
 /**
  * Phần tối thiểu của tệp Multer mà service cần.
@@ -71,6 +73,7 @@ export class UploadService {
    * @param folder thư mục con, phải nằm trong danh sách trắng.
    */
   async save(file: MulterFileLike | undefined, folder: string): Promise<UploadedFileView> {
+    if (!isUploadFolder(folder)) throw new BadRequestException('Thư mục tải lên không hợp lệ');
     if (!file) {
       throw new BadRequestException('Không tìm thấy tệp trong yêu cầu (field name: "file")');
     }
@@ -96,6 +99,14 @@ export class UploadService {
     }
 
     const filename = `${randomUUID()}${allowed.ext}`;
+    if (process.env.UPLOAD_PROVIDER === 'cloudinary') {
+      const url = await uploadToCloudinary(file.buffer, file.mimetype, `tourgo/${folder}/${filename.slice(0, -allowed.ext.length)}`);
+      // Existing clients persist `path`, so cloud storage returns an absolute URL in both fields.
+      return { filename, path: url, url, mimetype: file.mimetype, size: file.size };
+    }
+    if (process.env.UPLOAD_PROVIDER && process.env.UPLOAD_PROVIDER !== 'local') {
+      throw new BadRequestException('UPLOAD_PROVIDER không hợp lệ');
+    }
     const dir = await this.ensureFolder(folder);
     const absolute = path.join(dir, filename);
 

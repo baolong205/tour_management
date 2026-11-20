@@ -1,6 +1,7 @@
 /** Bổ sung ảnh Pexels đã tải về cho 6 tour DEMO; không thay ảnh người dùng tự thêm. */
 import 'reflect-metadata';
 import { ConfigModule } from '@nestjs/config';
+import { databaseSsl } from '../src/config/database-ssl.js';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -27,6 +28,7 @@ const photos = await Promise.all(manifest.photos.map(async photo => {
   return { ...photo, url: `/uploads/tours/demo/${filename}` };
 }));
 const source = new DataSource({
+  ssl: databaseSsl(),
   type: 'mysql', host: process.env.DB_HOST ?? 'localhost', port: Number(process.env.DB_PORT ?? 3306),
   username: process.env.DB_USERNAME ?? 'root', password: process.env.DB_PASSWORD ?? '',
   database: process.env.DB_DATABASE ?? 'tour_management', timezone: '+07:00', charset: 'utf8mb4',

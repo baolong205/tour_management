@@ -26,6 +26,7 @@
     "db:seed:images": "npm run db:build && node dist-scripts/scripts/seed-tour-images.js",
     "db:seed:promotions": "npm run db:build && node dist-scripts/scripts/seed-promotions.js",
     "db:seed:destinations": "npm run db:build && node dist-scripts/scripts/seed-tour-destinations.js",
+    "db:seed:demo": "npm run db:seed && npm run db:seed:tours && npm run db:seed:images && npm run db:seed:promotions && npm run db:seed:destinations",
     "test": "vitest run",
     "test:entities": "vitest run src/database/verify-entities.spec.ts",
     "test:watch": "vitest",

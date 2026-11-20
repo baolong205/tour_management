@@ -18,6 +18,7 @@
  */
 import 'reflect-metadata';
 import { ConfigModule } from '@nestjs/config';
+import { databaseSsl } from '../src/config/database-ssl.js';
 import { DataSource } from 'typeorm';
 import { ALL_ENTITIES } from '../src/common/entities/entity-list.js';
 import { BookingStatus, PromotionRedemptionStatus } from '../src/common/enums/index.js';
@@ -61,6 +62,7 @@ function statusFor(bookingStatus: BookingStatus): PromotionRedemptionStatus {
 
 await ConfigModule.forRoot({ envFilePath: '.env' });
 const source = new DataSource({
+  ssl: databaseSsl(),
   type: 'mysql',
   host: process.env.DB_HOST ?? 'localhost',
   port: Number(process.env.DB_PORT ?? 3306),

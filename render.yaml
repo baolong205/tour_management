@@ -1,0 +1,56 @@
+# Free web service only. Supply an external MySQL-compatible database.
+services:
+  - type: web
+    name: tourgo-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev --prefix backend && npm run build --prefix backend && npm run db:build --prefix backend
+    startCommand: cd backend && node dist-scripts/scripts/migrate.js && node scripts/prepare-demo-images.mjs && node dist/main.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: API_PREFIX
+        value: api
+      - key: DB_SYNCHRONIZE
+        value: "false"
+      - key: DB_SSL
+        value: "true"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: APP_PUBLIC_URL
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: PAYMENT_MOCK_SECRET
+        generateValue: true
+      - key: UPLOAD_PROVIDER
+        value: cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: MAIL_ENABLED
+        value: "false"
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
