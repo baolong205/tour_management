@@ -1,7 +1,12 @@
 {
   "cli": { "appVersionSource": "remote" },
   "build": {
-    "preview": { "distribution": "internal", "environment": "preview", "android": { "buildType": "apk" } },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "env": { "EXPO_PUBLIC_API_URL": "https://tourgo-api.onrender.com/api" },
+      "android": { "buildType": "apk" }
+    },
     "production": { "autoIncrement": true }
   },
   "submit": { "production": {} }
