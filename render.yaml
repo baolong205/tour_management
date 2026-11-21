@@ -50,6 +50,9 @@ services:
         sync: false
       - key: MAIL_ENABLED
         value: "false"
+      # Enable only after configuring BREVO_API_KEY and a verified MAIL_FROM in Render.
+      - key: MAIL_PROVIDER
+        value: brevo
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD

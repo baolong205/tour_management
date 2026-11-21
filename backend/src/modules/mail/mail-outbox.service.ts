@@ -79,7 +79,7 @@ export class MailOutboxService {
     try {
       await this.transport.send(message);
     } catch (error) {
-      // Store the code, not SMTP responses which can contain credentials or recipient data.
+      // Store the code, not provider responses which can contain credentials or recipient data.
       const code = (error as { code?: string }).code ?? 'SMTP_SEND_FAILED';
       await this.messages.update(where, {
         status: message.attempts >= MAX_ATTEMPTS ? 'FAILED' : 'PENDING',

@@ -15,17 +15,19 @@ async function main(): Promise<void> {
   await ConfigModule.forRoot({ envFilePath: '.env' });
   // Enable only this transport. Leave the application's background outbox setting intact.
   const config = new ConfigService({ MAIL_ENABLED: 'true' });
-  const missing = ['SMTP_HOST', 'MAIL_FROM'].filter(key => {
+  const provider = config.get<string>('MAIL_PROVIDER', 'smtp');
+  const required = provider === 'brevo' ? ['BREVO_API_KEY', 'MAIL_FROM'] : ['SMTP_HOST', 'MAIL_FROM'];
+  const missing = required.filter(key => {
     const value = config.get<string>(key, '').trim();
     return !value || /example\.(com|test)|your-domain|your-provider/i.test(value);
   });
-  if (config.get<string>('SMTP_HOST', '').toLowerCase() === 'smtp.gmail.com') {
+  if (provider === 'smtp' && config.get<string>('SMTP_HOST', '').toLowerCase() === 'smtp.gmail.com') {
     for (const key of ['SMTP_USER', 'SMTP_PASSWORD']) {
       if (!config.get<string>(key, '').trim()) missing.push(key);
     }
   }
   if (missing.length) {
-    throw new Error(`Chưa cấu hình ${missing.join(', ')} trong backend/.env. Nhập thông tin SMTP trực tiếp vào file này, không gửi mật khẩu qua chat.`);
+    throw new Error(`Chưa cấu hình ${missing.join(', ')} trong backend/.env. Điền trực tiếp vào file, không gửi API key/mật khẩu qua chat.`);
   }
 
   const transport = new MailTransportService(config);
@@ -34,11 +36,11 @@ async function main(): Promise<void> {
     await transport.send(Object.assign(new MailMessage(), {
       id: randomUUID(), recipient: values.to,
       subject: 'TourGo – Kiểm tra gửi email thật',
-      text: `Xin chào,\n\nĐây là email kiểm tra chức năng gửi thư từ dự án quản lý tour TourGo.\nThời gian: ${now} (giờ Việt Nam).\nNếu bạn nhận được thư này, cấu hình SMTP đã gửi thư thành công.\n\nEmail thử nghiệm này không xác nhận một giao dịch thanh toán.`,
+      text: `Xin chào,\n\nĐây là email kiểm tra chức năng gửi thư từ dự án quản lý tour TourGo.\nThời gian: ${now} (giờ Việt Nam).\nNếu bạn nhận được thư này, dịch vụ email đã gửi thư thành công.\n\nEmail thử nghiệm này không xác nhận một giao dịch thanh toán.`,
       html: `<div style="font-family:Arial,sans-serif;line-height:1.7;color:#173344;max-width:640px;margin:auto;padding:24px"><h1 style="color:#087f8c">TourGo</h1><h2>Kiểm tra gửi email thật</h2><p>Xin chào,</p><p>Đây là email kiểm tra chức năng gửi thư từ dự án quản lý tour TourGo.</p><p>Thời gian: <strong>${now}</strong> (giờ Việt Nam).</p><p>Nếu bạn nhận được thư này, cấu hình SMTP đã gửi thư thành công.</p><hr><p style="font-size:13px;color:#5c6f7b">Email thử nghiệm này không xác nhận một giao dịch thanh toán.</p></div>`,
       attachmentName: null,
     }));
-    console.log(`SMTP đã chấp nhận email thử nghiệm gửi tới ${values.to}. Kiểm tra Inbox và Spam / Thư rác.`);
+    console.log(`Dịch vụ email đã chấp nhận thư thử nghiệm gửi tới ${values.to}. Kiểm tra Inbox và Spam / Thư rác.`);
   } finally {
     transport.onModuleDestroy();
   }

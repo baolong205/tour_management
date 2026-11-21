@@ -4,6 +4,7 @@
 
 Hướng dẫn website Vercel, API Render và APK Android: `docs/DEPLOY-NOP-BAI.md`.
 Cấu hình deploy đã có trong repo; cần tài khoản dịch vụ và database cloud để tạo link/APK thật.
+Gửi hóa đơn qua HTTPS trên Render Free: `docs/EMAIL-RENDER.md`.
 
 Dự án gồm ba phần dùng chung một backend NestJS và database MySQL:
 

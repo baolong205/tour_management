@@ -74,8 +74,9 @@ Nếu migration lỗi, xem log và dừng tại đây; không dùng `db:sync -- 
 API chỉ được coi là triển khai xong khi `/api/health` trả `status: ok`.
 
 Render Free có thể ngủ và lần mở lại chậm; job định kỳ không chạy khi server ngủ.
-`MAIL_ENABLED=false` vì bản cấu hình này không triển khai dịch vụ gửi mail qua HTTP API.
-Không đánh dấu email là đã gửi khi đang tắt mail. Chức năng gửi email thực tế không có trong bản demo này.
+`MAIL_ENABLED=false` mặc định để chưa gửi thư khi chưa có thông tin dịch vụ.
+Để gửi hóa đơn trên Render Free, làm theo `docs/EMAIL-RENDER.md`: cấu hình Brevo HTTPS API, xác minh người gửi rồi bật mail.
+Không đánh dấu email là đã gửi khi đang tắt mail.
 Thanh toán vẫn là **giả lập**, không phải thanh toán tiền thật.
 
 ## 6. Seed database cloud từ máy bạn
